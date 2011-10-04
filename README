@@ -1,0 +1,18 @@
+To install, place the binaries in your bin, and configure NLog like so:
+
+<pre class="brush: xml;">
+&lt;?xml version="1.0" encoding="utf-8" ?&gt;
+&lt;nlog xmlns="http://www.nlog-project.org/schemas/NLog.xsd"
+  		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"&gt;
+	&lt;extensions&gt;
+		&lt;add assembly="NLog.MongoDB"/&gt;
+	&lt;/extensions&gt;
+
+	&lt;targets&gt;
+		&lt;target name="Mongo" type="MongoDB" host="localhost" port="27017"/&gt;
+	&lt;/targets&gt;
+	&lt;rules&gt;
+		&lt;logger name="*" minLevel="Info" appendTo="Mongo"/&gt;
+	&lt;/rules&gt;
+&lt;/nlog&gt;
+</pre>
