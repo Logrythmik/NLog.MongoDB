@@ -34,7 +34,7 @@ namespace NLog.MongoDB
 		}
 		private string _Database;
 
-        private bool HasCredentials { get { return !string.IsNullOrWhiteSpace(this.Username) && !string.IsNullOrWhiteSpace(this.Password); }}
+       		private bool HasCredentials { get { return !string.IsNullOrWhiteSpace(this.Username) && !string.IsNullOrWhiteSpace(this.Password); }}
 
 		internal void TestWrite(LogEventInfo logEvent)
 		{
