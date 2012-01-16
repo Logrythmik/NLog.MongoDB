@@ -57,9 +57,12 @@ namespace NLog.MongoDB.Tests
 			_mockProvider.Verify();
 			_mockRepository.Verify();
 
-			new MongoDBTarget().Host.Should().Be("localhost");
-			new MongoDBTarget().Port.Should().Be(27017);
-			new MongoDBTarget().Database.Should().Be("NLog");
+			new MongoDBTarget().Host
+                .Should().Be("localhost");
+			new MongoDBTarget().Port
+                .Should().Be(27017);
+			new MongoDBTarget().Database
+                .Should().Be("NLog");
 		}
 
 		[Test]
@@ -79,13 +82,17 @@ namespace NLog.MongoDB.Tests
 				LogLevel.Error, "Test Log Message",
 				new Exception("Test Exception"));
 				
-			collection.FindAll().Count().Should().Be(1);
+			collection.FindAll().Count()
+                .Should().Be(1);
 
 			var logEntry = collection.FindAll().First();
 
-			logEntry.Level.Should().Be(LogLevel.Error.ToString());
-			logEntry.Message.Should().Be("Test Log Message");
-			logEntry.Exception.Message.Should().Be("Test Exception");
+			logEntry.Level
+                .Should().Be(LogLevel.Error.ToString());
+			logEntry.Message
+                .Should().Be("Test Log Message");
+			logEntry.Exception.Message
+                .Should().Be("Test Exception");
 				
 			
 		}
