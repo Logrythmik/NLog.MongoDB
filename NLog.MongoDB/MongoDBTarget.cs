@@ -43,10 +43,10 @@ namespace NLog.MongoDB
 
 		protected override void Write(LogEventInfo logEvent)
 		{
-		    var settings = new MongoServerSettings { Server = new MongoServerAddress(this.Host, this.Port) };
-            
-            if (HasCredentials)
-                settings.DefaultCredentials = new MongoCredentials(this.Username, this.Password);
+			var settings = new MongoServerSettings { Server = new MongoServerAddress(this.Host, this.Port) };
+	            	
+	            	if (HasCredentials)
+	                	settings.DefaultCredentials = new MongoCredentials(this.Username, this.Password);
 
 			using (var repository = Provider().GetRepository(settings, this.Database))
 			{
