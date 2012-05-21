@@ -1,10 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
 using MongoDB.Driver;
-using NLog;
 using NLog.Targets;
 
 namespace NLog.MongoDB
@@ -28,12 +23,18 @@ namespace NLog.MongoDB
 		}
 		private int? _Port;
 
+        	public string Username { get; set; }
+
+        	public string Password { get; set; }
+
 		public string Database
 		{
 			get { return _Database ?? "NLog"; }
 			set { _Database = value; }
 		}
 		private string _Database;
+
+       		private bool HasCredentials { get { return !string.IsNullOrWhiteSpace(this.Username) && !string.IsNullOrWhiteSpace(this.Password); }}
 
 		internal void TestWrite(LogEventInfo logEvent)
 		{
@@ -42,12 +43,12 @@ namespace NLog.MongoDB
 
 		protected override void Write(LogEventInfo logEvent)
 		{
+			var settings = new MongoServerSettings { Server = new MongoServerAddress(this.Host, this.Port) };
+	            	
+	            	if (HasCredentials)
+	                	settings.DefaultCredentials = new MongoCredentials(this.Username, this.Password);
 
-			using (var repository = Provider().GetRepository(
-							new MongoServerSettings {
-			            		Server = new MongoServerAddress(this.Host, this.Port)
-			            	}, 
-							this.Database))
+			using (var repository = Provider().GetRepository(settings, this.Database))
 			{
 				repository.Insert(logEvent);
 			}
