@@ -4,3 +4,5 @@
 [Bb]in/
 [Oo]bj/
 _[Rr]esharper.*/
+TestResult.xml
+/lib/
