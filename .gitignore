@@ -1,0 +1,6 @@
+*.swp
+*.suo
+*.user
+[Bb]in/
+[Oo]bj/
+_[Rr]esharper.*/
