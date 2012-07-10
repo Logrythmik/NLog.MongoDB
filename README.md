@@ -1,5 +1,8 @@
 NLog.MongoDB Target
 =============
+The NLog.MongoDB target allows you to use a MongoDB instance as the persistence mechanism for NLog.
+
+You can define which database and server to use, but by default a collection will be created for each "Logger" you use.
 
 Installation
 -------------
