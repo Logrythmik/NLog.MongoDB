@@ -67,8 +67,10 @@ To install, place the binaries in your application bin and add the following con
 
 * Host (Defaults to 'localhost')
 * Port (Defaults to 27017)
+* Database(Defaults to 'NLog')
 * Username
 * Password
-* Database(Defaults to 'NLog')
+OR
 * ConnectionString (a complete Mongo Url)
+OR
 * ConnectionName (the name configured in the configuration/connectionString node)
