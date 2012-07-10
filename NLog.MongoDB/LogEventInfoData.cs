@@ -18,14 +18,13 @@ namespace NLog.MongoDB
 			this.UserStackFrame = logEventInfo.UserStackFrame;
 			this.UserStackFrameNumber = logEventInfo.UserStackFrameNumber;
 			this.StackTrace = logEventInfo.StackTrace;
-			this.Exception = logEventInfo.Exception;
+			this.Exception = new ExceptionData(logEventInfo.Exception);
 			this.LoggerName = logEventInfo.LoggerName;
 
 			this.Message = logEventInfo.Message;
 			this.Parameters = logEventInfo.Parameters;
 			this.FormattedMessage = logEventInfo.FormattedMessage;
 			this.Properties = logEventInfo.Properties;
-
 		}
 
 		public Guid _id { get; set; }
@@ -41,7 +40,7 @@ namespace NLog.MongoDB
 		public StackFrame UserStackFrame { get; set; }
 		public int UserStackFrameNumber { get; set; }
 		public StackTrace StackTrace { get; set; }
-		public Exception Exception { get; set; }
+        public ExceptionData Exception { get; set; }
 		public string LoggerName { get; set; }
 
 
@@ -52,6 +51,5 @@ namespace NLog.MongoDB
 
 		public string FormattedMessage { get; set; }
 		public IDictionary<object, object> Properties { get; set; }
-	
 	}
 }

@@ -1,6 +1,7 @@
 using System;
 using System.Configuration;
 using System.Linq;
+using System.Threading;
 using FluentAssertions;
 using MongoDB.Driver;
 using NUnit.Framework;
@@ -69,7 +70,9 @@ namespace NLog.MongoDB.Tests
             logger.LogException(
                 LogLevel.Error,
                 "Test Log Message",
-                new Exception("Test Exception"));
+                new Exception("Test Exception", new Exception("Inner Exception")));
+
+            Thread.Sleep(2000);
 
             collection.FindAll().Count()
                 .Should().Be(1);
@@ -81,7 +84,9 @@ namespace NLog.MongoDB.Tests
             logEntry.Message
                 .Should().Be("Test Log Message");
             logEntry.Exception.Message
-                .Should().Be("Exception of type 'System.Exception' was thrown.");
+                .Should().Be("Test Exception");
+            logEntry.Exception.InnerException.Message
+                .Should().Be("Inner Exception");
 
             // Clean-up
             db.DropCollection(loggerName);

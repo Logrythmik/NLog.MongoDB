@@ -55,6 +55,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ExceptionData.cs" />
     <Compile Include="IRepository.cs" />
     <Compile Include="IRepositoryProvider.cs" />
     <Compile Include="LogEventInfoData.cs" />
@@ -62,7 +63,7 @@
     <Compile Include="MongoRepository.cs" />
     <Compile Include="MongoServerProvider.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="_Extensions.cs" />
+    <Compile Include="Extensions.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
