@@ -1,0 +1,124 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>NLog.mongodb by Logrythmik</title>
+
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1>NLog.mongodb</h1>
+        <p>An NLog Target for MongoDB persistence.</p>
+
+        <p class="view"><a href="https://github.com/Logrythmik/NLog.MongoDB">View the Project on GitHub <small>Logrythmik/NLog.MongoDB</small></a></p>
+
+
+        <ul>
+          <li><a href="https://github.com/Logrythmik/NLog.MongoDB/zipball/master">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/Logrythmik/NLog.MongoDB/tarball/master">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="https://github.com/Logrythmik/NLog.MongoDB">View On <strong>GitHub</strong></a></li>
+        </ul>
+      </header>
+      <section>
+        <h1>NLog.MongoDB Target</h1>
+
+<p>The NLog.MongoDB target allows you to use a MongoDB instance as the persistence mechanism for NLog.</p>
+
+<p>You can define which database and server to use, but by default a collection will be created for each "Logger" you use.</p>
+
+<h2>Installation</h2>
+
+<p>To install, place the binaries in your application bin and add the following configuration entries to your NLog configuration.</p>
+
+<h3>Using an existing connection string</h3>
+
+<pre><code>&lt;?xml version="1.0" encoding="utf-8" ?&gt;
+&lt;nlog xmlns="http://www.nlog-project.org/schemas/NLog.xsd"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"&gt;
+    &lt;extensions&gt;
+        &lt;add assembly="NLog.MongoDB"/&gt;
+    &lt;/extensions&gt;
+
+    &lt;targets&gt;
+        &lt;target name="Mongo" type="MongoDB" connectionName="ConnectionName" /&gt;
+    &lt;/targets&gt;
+    &lt;rules&gt;
+        &lt;logger name="*" minLevel="Info" appendTo="Mongo"/&gt;
+    &lt;/rules&gt;
+&lt;/nlog&gt;
+</code></pre>
+
+<h3>Using a new connection string</h3>
+
+<pre><code>&lt;?xml version="1.0" encoding="utf-8" ?&gt;
+&lt;nlog xmlns="http://www.nlog-project.org/schemas/NLog.xsd"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"&gt;
+    &lt;extensions&gt;
+        &lt;add assembly="NLog.MongoDB"/&gt;
+    &lt;/extensions&gt;
+
+    &lt;targets&gt;
+        &lt;target name="Mongo" type="MongoDB" connectionString="mongodb://mongo:db@server:12345/nlog" /&gt;
+    &lt;/targets&gt;
+    &lt;rules&gt;
+        &lt;logger name="*" minLevel="Info" appendTo="Mongo"/&gt;
+    &lt;/rules&gt;
+&lt;/nlog&gt; 
+</code></pre>
+
+<h3>Using integrated settings</h3>
+
+<pre><code>&lt;?xml version="1.0" encoding="utf-8" ?&gt;
+&lt;nlog xmlns="http://www.nlog-project.org/schemas/NLog.xsd"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"&gt;
+    &lt;extensions&gt;
+        &lt;add assembly="NLog.MongoDB"/&gt;
+    &lt;/extensions&gt;
+
+    &lt;targets&gt;
+        &lt;target name="Mongo" type="MongoDB" 
+            database="nlog"
+            host="server" port="12348"            
+            username="mongo" password="password"/&gt;
+    &lt;/targets&gt;
+    &lt;rules&gt;
+        &lt;logger name="*" minLevel="Info" appendTo="Mongo"/&gt;
+    &lt;/rules&gt;
+&lt;/nlog&gt;
+</code></pre>
+
+<h3>Target Settings:</h3>
+
+<ul>
+<li>Host (Defaults to 'localhost')</li>
+<li>Port (Defaults to 27017)</li>
+<li>Database(Defaults to 'NLog')</li>
+<li>Username</li>
+<li>Password</li>
+</ul><p>OR</p>
+
+<ul>
+<li>ConnectionString (a complete Mongo Url)</li>
+</ul><p>OR</p>
+
+<ul>
+<li>ConnectionName (the name configured in the configuration/connectionString node)</li>
+</ul>
+      </section>
+      <footer>
+        <p>This project is maintained by <a href="https://github.com/Logrythmik">Logrythmik</a></p>
+        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
+      </footer>
+    </div>
+    <script src="javascripts/scale.fix.js"></script>
+    
+  </body>
+</html>
