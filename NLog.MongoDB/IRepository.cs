@@ -1,8 +1,6 @@
-using System;
-
 namespace NLog.MongoDB
 {
-	public interface IRepository : IDisposable
+	public interface IRepository
 	{
 		void Insert(LogEventInfo item);
 	}

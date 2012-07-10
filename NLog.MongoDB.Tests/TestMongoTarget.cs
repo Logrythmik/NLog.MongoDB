@@ -1,12 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
+using FluentAssertions;
 using MongoDB.Driver;
 using Moq;
-using NLog.Common;
 using NUnit.Framework;
-using FluentAssertions;
 
 namespace NLog.MongoDB.Tests
 {
@@ -29,22 +26,17 @@ namespace NLog.MongoDB.Tests
 		[Test]
 		public void TestSettingsAndRepository()
 		{
-			var databaseName = "Test";
-			var host = "localtest";
-			var port = 1234;
+			var connectionName = "Logs";
 
 			_mockProvider.Setup(
-				p => p.GetRepository(It.IsAny<MongoServerSettings>(), It.IsAny<string>()))
+				p => p.GetRepository(It.IsAny<string>()))
 				.Returns(_mockRepository.Object)
 				.Verifiable();
 
-			var target = new MongoDBTarget
-			             	{
-			             		Database = databaseName,
-			             		Host = host,
-			             		Port = port,
-			             		Provider = () => _mockProvider.Object
-			             	};
+			var target = new MongoDBTarget(_mockProvider.Object)
+			{
+			    ConnectionName = connectionName
+			};
 
 			var eventLogInfo = new LogEventInfo();
 
@@ -56,13 +48,6 @@ namespace NLog.MongoDB.Tests
 
 			_mockProvider.Verify();
 			_mockRepository.Verify();
-
-			new MongoDBTarget().Host
-                .Should().Be("localhost");
-			new MongoDBTarget().Port
-                .Should().Be(27017);
-			new MongoDBTarget().Database
-                .Should().Be("NLog");
 		}
 
 		[Test]
