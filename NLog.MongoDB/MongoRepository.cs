@@ -1,4 +1,4 @@
-using System.Collections;
+using System.Text.RegularExpressions;
 using MongoDB.Driver;
 
 namespace NLog.MongoDB
@@ -13,15 +13,24 @@ namespace NLog.MongoDB
 			string database)
 		{
 			_Server = new MongoServer(settings);
-			_Database = database;
+            _Database = database;
 			_Server.Connect();
 		}
+
+        public MongoRepository(
+            string connectionString,
+            string database)
+        {
+            _Server = MongoServer.Create(connectionString);
+            _Database = connectionString.ParseDatabaseName() ?? database;
+            _Server.Connect();
+        }
 
 		public void Insert(LogEventInfo item)
 		{
 			var db = _Server.GetDatabase(_Database);
 
-			var collection = db.GetCollection<LogEventInfoData>(item.LoggerName);
+		    var collection = db.GetCollection<LogEventInfoData>(item.LoggerName);
 			collection.Insert(new LogEventInfoData(item));
 		}
 

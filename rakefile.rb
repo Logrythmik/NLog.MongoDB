@@ -1,18 +1,29 @@
 require 'albacore'
+require './rakefile.config'
 
 namespace :nuget do
 
-	task :package => :setup_build do
-		command = '.nuget/NuGet.exe'
-		nuspec = 'NLog.MongoDB.nuspec'
-		base_folder = 'build/'
-		sh ".nuget/NuGet.exe pack -BasePath #{base_folder} -Output #{base_folder} #{nuspec}"
+	command = '.nuget/NuGet.exe'
+	nuspec = 'NLog.MongoDB.nuspec'
+	build_directory = 'build'	
+	version = '0.2.0'
+
+	task :package => :setup_build do		
+		base_folder = "#{build_directory}/"
+		sh "#{command} pack -BasePath #{base_folder} -Output #{base_folder} #{nuspec}"
 	end
 
-	directory 'build'
+	directory build_directory
 
 	task :setup_build => ['build:release', 'build'] do
 		cp FileList['NLog.MongoDB/bin/Release/NLog.MongoDB.*'], 'build'
+	end
+	
+	task :push => :package do
+		api_key = NLog_MongoDB::Build.api_key
+		
+		sh "#{command} setApiKey #{api_key}"
+		sh "#{command} push #{build_directory}/NLog.MongoDB.#{version}.nupkg"
 	end
 
 end

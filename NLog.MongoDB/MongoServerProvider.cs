@@ -10,5 +10,12 @@ namespace NLog.MongoDB
 		{
 			return new MongoRepository(settings, database);
 		}
+
+	    public IRepository GetRepository(
+            string connectionString,
+            string database)
+	    {
+	        return new MongoRepository(connectionString, database);
+	    }
 	}
 }

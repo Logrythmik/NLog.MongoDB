@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NLog.MongoDB.Tests", "NLog.
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{4280133F-10A6-40AC-AC17-8769A243D07E}"
 	ProjectSection(SolutionItems) = preProject
+		C:\Projects\IPC.Web\Framework\MVC\_Lib\Tools\NuGet.Config = C:\Projects\IPC.Web\Framework\MVC\_Lib\Tools\NuGet.Config
+		C:\Projects\IPC.Web\Framework\MVC\_Lib\Tools\NuGet.exe = C:\Projects\IPC.Web\Framework\MVC\_Lib\Tools\NuGet.exe
 		.nuget\NuGet.settings.targets = .nuget\NuGet.settings.targets
 		.nuget\NuGet.targets = .nuget\NuGet.targets
 	EndProjectSection
