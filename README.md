@@ -70,7 +70,9 @@ To install, place the binaries in your application bin and add the following con
 * Database(Defaults to 'NLog')
 * Username
 * Password
+
 OR
 * ConnectionString (a complete Mongo Url)
+
 OR
 * ConnectionName (the name configured in the configuration/connectionString node)
