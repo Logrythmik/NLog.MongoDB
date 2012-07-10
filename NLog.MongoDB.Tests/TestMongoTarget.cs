@@ -51,36 +51,37 @@ namespace NLog.MongoDB.Tests
 		}
 
 		[Test]
-        [Ignore("Mongo C# driver 1.4.2 doesn't seem to serialize exceptions correctly")]
 		public void TestActualLog()
 		{
 			var logger = LogManager.GetLogger("MyTestClass");
+
 			var server = new MongoServer(new MongoServerSettings
-				{
-					Server = new MongoServerAddress("localhost", 27017)
-				});
+			{
+				Server = new MongoServerAddress("localhost", 27017)
+			});
+
 			var db = server.GetDatabase("NLog");
 			var collection = db.GetCollection<LogEventInfoData>("MyTestClass");
-
 			collection.RemoveAll();
 
 			logger.LogException(
-				LogLevel.Error, "Test Log Message",
-				new Exception("Test Exception"));
-				
-			collection.FindAll().Count()
-                .Should().Be(1);
+				LogLevel.Error,
+				"Test Log Message",
+				new Exception("Test Exception", new Exception("Inner exception")));
+			
+			var logEntries = collection.FindAll();
+	
+			logEntries.Count().Should().Be(1);
 
-			var logEntry = collection.FindAll().First();
-
+			var logEntry = logEntries.First();
 			logEntry.Level
                 .Should().Be(LogLevel.Error.ToString());
 			logEntry.Message
                 .Should().Be("Test Log Message");
 			logEntry.Exception.Message
                 .Should().Be("Test Exception");
-				
-			
+			logEntry.Exception.InnerException.Message
+				.Should().Be("Inner exception");
 		}
 	}
 }
