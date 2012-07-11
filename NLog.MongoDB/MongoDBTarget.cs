@@ -1,6 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Configuration;
+using MongoDB.Bson;
 using MongoDB.Driver;
+using NLog.Config;
 using NLog.Targets;
 
 namespace NLog.MongoDB
@@ -10,7 +13,15 @@ namespace NLog.MongoDB
 	{
 		public Func<IRepositoryProvider> Provider = () => new MongoServerProvider();
 
+		public MongoDBTarget()
+		{
+			Fields = new List<MongoDBTargetField>();
+		}
+
         #region Exposed Properties
+
+		[ArrayParameter(typeof(MongoDBTargetField), "field")]
+		public IList<MongoDBTargetField> Fields { get; private set; }
 
         public string ConnectionString { get; set; }
 
@@ -75,6 +86,89 @@ namespace NLog.MongoDB
 
         private bool HasCredentials { get { return !string.IsNullOrWhiteSpace(this.Username) && !string.IsNullOrWhiteSpace(this.Password); }}
 
+		private BsonDocument BuildBsonDocument(LogEventInfo logEvent)
+		{
+			if (Fields.Count == 0)
+				return BuildFullBsonDocument(logEvent);
+
+			var doc = new BsonDocument();
+			foreach (var field in Fields)
+			{
+				var value = field.Layout.Render(logEvent);
+
+				doc.Add(field.Name, BsonValue.Create(value));
+			}
+
+			return doc;
+		}
+
+		private BsonDocument BuildFullBsonDocument(LogEventInfo logEvent)
+		{
+			var doc = new BsonDocument();
+			doc["sequenceID"] = logEvent.SequenceID;
+			doc["timeStamp"] = logEvent.TimeStamp;
+			doc["machineName"] = Environment.MachineName;
+
+			if (logEvent.LoggerName != null)
+				doc["loggerName"] = logEvent.LoggerName;
+			if (logEvent.Message != null)
+				doc["message"] = logEvent.Message;
+			if (logEvent.FormattedMessage != null)
+				doc["formattedMessage"] = logEvent.FormattedMessage;
+			if (logEvent.Level != null)
+				doc["level"] = logEvent.Level.ToString();
+			if (logEvent.StackTrace != null)
+				doc["stackTrace"] = logEvent.StackTrace.ToString();
+
+			if (logEvent.UserStackFrame != null)
+			{
+				doc["userStackFrame"] = logEvent.UserStackFrame.ToString();
+				doc["UserStackFrameNumber"] = logEvent.UserStackFrameNumber;
+			}
+
+			if (logEvent.Exception != null)
+			{
+				doc["exception"] = BuildExceptionBsonDocument(logEvent.Exception);
+			}
+
+			if (logEvent.Properties != null && logEvent.Properties.Count > 0)
+			{
+				doc["properties"] = BuildPropertiesBsonDocument(logEvent.Properties);
+			}
+
+			if (logEvent.Parameters != null && logEvent.Parameters.Length > 0)
+			{
+				doc["Parameters"] = logEvent.Parameters.ToBson(); ;
+			}
+
+			return doc;
+		}
+
+		private BsonDocument BuildPropertiesBsonDocument(IDictionary<object, object> properties)
+		{
+			var doc = new BsonDocument();
+			foreach (var entry in properties)
+			{
+				doc[entry.Key.ToString()] = entry.Value.ToString();
+			}
+			return doc;
+		}
+
+		private BsonDocument BuildExceptionBsonDocument(Exception ex)
+		{
+			var doc = new BsonDocument();
+			doc["message"] = ex.Message;
+			doc["source"] = ex.Source ?? string.Empty;
+			doc["stackTrace"] = ex.StackTrace ?? string.Empty;
+
+			if (ex.InnerException != null)
+			{
+				doc["innerException"] = BuildExceptionBsonDocument(ex.InnerException);
+			}
+
+			return doc;
+		}
+
         #endregion
 
         #region Public Methods
@@ -88,11 +182,12 @@ namespace NLog.MongoDB
 		{
 			using (var repository = GetRepository())
 			{
-				repository.Insert(logEvent);
+				repository.Insert(
+					logEvent.LoggerName,
+					BuildBsonDocument(logEvent));
 			}
         }
 
         #endregion
-
     }
 }

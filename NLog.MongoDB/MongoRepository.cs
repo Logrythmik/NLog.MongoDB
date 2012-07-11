@@ -1,4 +1,5 @@
 using System.Text.RegularExpressions;
+using MongoDB.Bson;
 using MongoDB.Driver;
 
 namespace NLog.MongoDB
@@ -26,12 +27,12 @@ namespace NLog.MongoDB
             _Server.Connect();
         }
 
-		public void Insert(LogEventInfo item)
+		public void Insert(string collectionName, BsonDocument item)
 		{
 			var db = _Server.GetDatabase(_Database);
 
-		    var collection = db.GetCollection<LogEventInfoData>(item.LoggerName);
-			collection.Insert(new LogEventInfoData(item));
+		    var collection = db.GetCollection(collectionName);
+			collection.Insert(item);
 		}
 
 		public void Dispose()
