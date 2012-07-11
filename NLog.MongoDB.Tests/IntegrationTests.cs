@@ -11,6 +11,42 @@ namespace NLog.MongoDB.Tests
     [TestFixture]
     public class IntegrationTests
     {
+		[Test]
+		public void Test_DynamicFields()
+		{
+			var connectionString = ConfigurationManager.ConnectionStrings["MongoDB"].ConnectionString;
+			var server = MongoServer.Create(connectionString);
+			var dbName = connectionString.ParseDatabaseName();
+			var loggerName = "testDynamicFields";
+
+			var db = server.GetDatabase(dbName);
+            var collection = db.GetCollection(loggerName);
+
+            // Clear out test collection
+            collection.RemoveAll();
+
+            var logger = LogManager.GetLogger(loggerName);
+
+            logger.LogException(
+                LogLevel.Error,
+                "Test Log Message",
+                new Exception("Test Exception", new Exception("Inner Exception")));
+
+            Thread.Sleep(2000);
+
+            collection.FindAll().Count().Should().Be(1);
+
+            var logEntry = collection.FindAll().First();
+            
+			logEntry["level"].Should().Be(LogLevel.Error.ToString());
+            logEntry["message"].Should().Be("Test Log Message");
+            logEntry["exception"].Should().Be("Test Exception");
+            
+            // Clean-up
+            db.DropCollection(loggerName);
+            server.Disconnect();
+		}
+
         [Test]
         public void Test_ConnectionName()
         {
@@ -28,11 +64,11 @@ namespace NLog.MongoDB.Tests
         {
             var connectionString = ConfigurationManager.ConnectionStrings["MongoDB"].ConnectionString;
             var server = MongoServer.Create(connectionString);
-
-            TestMongoConnection(
-                server,
-                connectionString.ParseDatabaseName(),
-                "testMongoConnectionString");
+			
+			TestMongoConnection(
+				server,
+				connectionString.ParseDatabaseName(),
+				"testMongoConnectionString");
         }
 
         [Test]
@@ -60,7 +96,7 @@ namespace NLog.MongoDB.Tests
             string loggerName)
         {
             var db = server.GetDatabase(database);
-            var collection = db.GetCollection<LogEventInfoData>(loggerName);
+            var collection = db.GetCollection(loggerName);
 
             // Clear out test collection
             collection.RemoveAll();
@@ -79,13 +115,19 @@ namespace NLog.MongoDB.Tests
 
             var logEntry = collection.FindAll().First();
 
-            logEntry.Level
+            logEntry["level"]
                 .Should().Be(LogLevel.Error.ToString());
-            logEntry.Message
+            logEntry["message"]
                 .Should().Be("Test Log Message");
-            logEntry.Exception.Message
+            
+			var exception = logEntry["exception"].AsBsonDocument;
+			
+			exception["message"]
                 .Should().Be("Test Exception");
-            logEntry.Exception.InnerException.Message
+            
+			var innerException = exception["innerException"].AsBsonDocument;
+			
+			innerException["message"]
                 .Should().Be("Inner Exception");
 
             // Clean-up
