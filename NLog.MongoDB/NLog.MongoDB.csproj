@@ -55,11 +55,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ExceptionData.cs" />
     <Compile Include="IRepository.cs" />
     <Compile Include="IRepositoryProvider.cs" />
-    <Compile Include="LogEventInfoData.cs" />
     <Compile Include="MongoDBTarget.cs" />
+    <Compile Include="MongoDBTargetField.cs" />
     <Compile Include="MongoRepository.cs" />
     <Compile Include="MongoServerProvider.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

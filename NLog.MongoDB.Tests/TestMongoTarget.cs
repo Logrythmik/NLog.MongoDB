@@ -6,6 +6,7 @@ using Moq;
 using NLog.Common;
 using NUnit.Framework;
 using FluentAssertions;
+using MongoDB.Bson;
 
 namespace NLog.MongoDB.Tests
 {
@@ -48,7 +49,7 @@ namespace NLog.MongoDB.Tests
             var eventLogInfo = new LogEventInfo();
 
             _mockRepository.Setup(
-                r => r.Insert(eventLogInfo))
+                r => r.Insert(It.IsAny<string>(), It.IsAny<BsonDocument>()))
                 .Verifiable();
 
             target.TestWrite(eventLogInfo);
