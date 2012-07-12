@@ -76,6 +76,34 @@
 
 <h3>Using integrated settings</h3>
 
+<p>Targets now support custom formatting. If you specify field nodes within the target node, the target will use your configured settings to store the log event.</p>
+
+<pre><code>&lt;?xml version="1.0" encoding="utf-8" ?&gt;
+&lt;nlog xmlns="http://www.nlog-project.org/schemas/NLog.xsd"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"&gt;
+    &lt;extensions&gt;
+        &lt;add assembly="NLog.MongoDB"/&gt;
+    &lt;/extensions&gt;
+
+    &lt;targets&gt;
+        &lt;target name="Mongo" type="MongoDB" 
+            database="nlog"
+            host="server" port="12348"            
+            username="mongo" password="password"&gt;
+  		&lt;field name="timestamp" layout="${date}" /&gt;
+			&lt;field name="level" layout="${level}" /&gt;
+			&lt;field name="message" layout="${message}" /&gt;
+			&lt;field name="exception" layout="${exception}" /&gt;		
+		&lt;/target&gt;		
+    &lt;/targets&gt;
+    &lt;rules&gt;
+        &lt;logger name="*" minLevel="Info" appendTo="Mongo"/&gt;
+    &lt;/rules&gt;
+&lt;/nlog&gt;
+</code></pre>
+
+<h3>Using custom formatting</h3>
+
 <pre><code>&lt;?xml version="1.0" encoding="utf-8" ?&gt;
 &lt;nlog xmlns="http://www.nlog-project.org/schemas/NLog.xsd"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"&gt;
