@@ -102,10 +102,10 @@
         &lt;add assembly="NLog.MongoDB"/&gt;
     &lt;/extensions&gt;
     &lt;targets&gt;
-        &lt;target name="Mongo" type="MongoDB" 
-            database="nlog"
-            host="server" port="12348"            
-            username="mongo" password="password"&gt;
+		&lt;target name="Mongo" type="MongoDB" 
+			database="nlog"
+			host="server" port="12348"            
+			username="mongo" password="password"&gt;
 			&lt;field name="timestamp" layout="${date}" /&gt;
 			&lt;field name="level" layout="${level}" /&gt;
 			&lt;field name="message" layout="${message}" /&gt;
