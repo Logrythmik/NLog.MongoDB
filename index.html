@@ -20,7 +20,6 @@
 
         <p class="view"><a href="https://github.com/Logrythmik/NLog.MongoDB">View the Project on GitHub <small>Logrythmik/NLog.MongoDB</small></a></p>
 
-
         <ul>
           <li><a href="https://github.com/Logrythmik/NLog.MongoDB/zipball/master">Download <strong>ZIP File</strong></a></li>
           <li><a href="https://github.com/Logrythmik/NLog.MongoDB/tarball/master">Download <strong>TAR Ball</strong></a></li>
@@ -46,7 +45,6 @@
     &lt;extensions&gt;
         &lt;add assembly="NLog.MongoDB"/&gt;
     &lt;/extensions&gt;
-
     &lt;targets&gt;
         &lt;target name="Mongo" type="MongoDB" connectionName="ConnectionName" /&gt;
     &lt;/targets&gt;
@@ -64,7 +62,6 @@
     &lt;extensions&gt;
         &lt;add assembly="NLog.MongoDB"/&gt;
     &lt;/extensions&gt;
-
     &lt;targets&gt;
         &lt;target name="Mongo" type="MongoDB" connectionString="mongodb://mongo:db@server:12345/nlog" /&gt;
     &lt;/targets&gt;
@@ -84,17 +81,11 @@
     &lt;extensions&gt;
         &lt;add assembly="NLog.MongoDB"/&gt;
     &lt;/extensions&gt;
-
     &lt;targets&gt;
         &lt;target name="Mongo" type="MongoDB" 
             database="nlog"
             host="server" port="12348"            
-            username="mongo" password="password"&gt;
-  		&lt;field name="timestamp" layout="${date}" /&gt;
-			&lt;field name="level" layout="${level}" /&gt;
-			&lt;field name="message" layout="${message}" /&gt;
-			&lt;field name="exception" layout="${exception}" /&gt;		
-		&lt;/target&gt;		
+            username="mongo" password="password"/&gt;
     &lt;/targets&gt;
     &lt;rules&gt;
         &lt;logger name="*" minLevel="Info" appendTo="Mongo"/&gt;
@@ -110,12 +101,16 @@
     &lt;extensions&gt;
         &lt;add assembly="NLog.MongoDB"/&gt;
     &lt;/extensions&gt;
-
     &lt;targets&gt;
         &lt;target name="Mongo" type="MongoDB" 
             database="nlog"
             host="server" port="12348"            
-            username="mongo" password="password"/&gt;
+            username="mongo" password="password"&gt;
+  		&lt;field name="timestamp" layout="${date}" /&gt;
+			&lt;field name="level" layout="${level}" /&gt;
+			&lt;field name="message" layout="${message}" /&gt;
+			&lt;field name="exception" layout="${exception}" /&gt;		
+		&lt;/target&gt;		
     &lt;/targets&gt;
     &lt;rules&gt;
         &lt;logger name="*" minLevel="Info" appendTo="Mongo"/&gt;
