@@ -11,7 +11,7 @@ namespace NLog.MongoDB
 	[Target("MongoDB")]
 	public sealed class MongoDBTarget : Target
 	{
-		public Func<IRepositoryProvider> Provider = () => new MongoServerProvider();
+		public Func<IRepositoryProvider> GetProvider = () => new MongoServerProvider();
 
 		public MongoDBTarget()
 		{
@@ -26,8 +26,14 @@ namespace NLog.MongoDB
         public string ConnectionString { get; set; }
 
         public string ConnectionName { get; set; }
-		
-		public string Host
+
+        public string Username { get; set; }
+
+        public string Password { get; set; }
+
+        #region Defaulted Properties
+
+        public string Host
 		{
 			get { return _Host ?? "localhost"; }
 			set { _Host = value; }
@@ -41,10 +47,6 @@ namespace NLog.MongoDB
 		}
 		private int? _Port;
 
-        public string Username { get; set; }
-
-        public string Password { get; set; }
-
 		public string Database
 		{
 			get { return _Database ?? "NLog"; }
@@ -54,9 +56,11 @@ namespace NLog.MongoDB
 
         #endregion
 
+        #endregion
+
         #region Private Helpers
 
-        private IRepository GetRepository()
+        internal IRepository GetRepository()
         {
             // We have a connection string name, grab this from the config and pass it too the parser.
             if (!string.IsNullOrWhiteSpace(this.ConnectionName))
@@ -65,14 +69,14 @@ namespace NLog.MongoDB
                     string.IsNullOrWhiteSpace(ConfigurationManager.ConnectionStrings[this.ConnectionName].ConnectionString))
                     throw new MongoConnectionException("The connection string name specified was not found.");
 
-                return Provider().GetRepository(
+                return GetProvider().GetRepository(
                         ConfigurationManager.ConnectionStrings[this.ConnectionName].ConnectionString,
                         this.Database);
             }
             
             // We have a connection string
             if (!string.IsNullOrWhiteSpace(this.ConnectionString))
-                return Provider().GetRepository(this.ConnectionString, this.Database);
+                return GetProvider().GetRepository(this.ConnectionString, this.Database);
 
             // No connection strings at all, use the old method using the properties
             var database = this.Database;
@@ -81,12 +85,12 @@ namespace NLog.MongoDB
             if (HasCredentials)
                 settings.DefaultCredentials = new MongoCredentials(this.Username, this.Password);
 
-            return Provider().GetRepository(settings, database);
+            return GetProvider().GetRepository(settings, database);
         }
 
         private bool HasCredentials { get { return !string.IsNullOrWhiteSpace(this.Username) && !string.IsNullOrWhiteSpace(this.Password); }}
 
-		private BsonDocument BuildBsonDocument(LogEventInfo logEvent)
+        internal BsonDocument BuildBsonDocument(LogEventInfo logEvent)
 		{
 			if (Fields.Count == 0)
 				return BuildFullBsonDocument(logEvent);
@@ -102,7 +106,7 @@ namespace NLog.MongoDB
 			return doc;
 		}
 
-		private BsonDocument BuildFullBsonDocument(LogEventInfo logEvent)
+        internal BsonDocument BuildFullBsonDocument(LogEventInfo logEvent)
 		{
 			var doc = new BsonDocument();
 			doc["sequenceID"] = logEvent.SequenceID;
@@ -144,7 +148,7 @@ namespace NLog.MongoDB
 			return doc;
 		}
 
-		private BsonDocument BuildPropertiesBsonDocument(IDictionary<object, object> properties)
+        internal BsonDocument BuildPropertiesBsonDocument(IDictionary<object, object> properties)
 		{
 			var doc = new BsonDocument();
 			foreach (var entry in properties)
@@ -154,7 +158,7 @@ namespace NLog.MongoDB
 			return doc;
 		}
 
-		private BsonDocument BuildExceptionBsonDocument(Exception ex)
+        internal BsonDocument BuildExceptionBsonDocument(Exception ex)
 		{
 			var doc = new BsonDocument();
 			doc["message"] = ex.Message;
@@ -171,12 +175,14 @@ namespace NLog.MongoDB
 
         #endregion
 
-        #region Public Methods
+#if DEBUG
 
         internal void TestWrite(LogEventInfo logEvent)
 		{
 			Write(logEvent);
 		}
+
+#endif
 
 		protected override void Write(LogEventInfo logEvent)
 		{
@@ -188,6 +194,5 @@ namespace NLog.MongoDB
 			}
         }
 
-        #endregion
     }
 }

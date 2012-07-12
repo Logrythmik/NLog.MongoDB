@@ -65,8 +65,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="IntegrationTests.cs" />
+    <Compile Include="TestExtensions.cs" />
     <Compile Include="TestMongoTarget.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TestMongoTargetField.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="NLog.config">
