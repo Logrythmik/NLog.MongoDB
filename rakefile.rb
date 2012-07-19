@@ -6,7 +6,7 @@ namespace :nuget do
 	command = '.nuget/NuGet.exe'
 	nuspec = 'NLog.MongoDB.nuspec'
 	build_directory = 'build'	
-	version = '0.2.1'
+	version = '0.3.0'
 
 	task :package => :setup_build do		
 		base_folder = "#{build_directory}/"
