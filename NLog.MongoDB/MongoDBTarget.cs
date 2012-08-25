@@ -90,23 +90,22 @@ namespace NLog.MongoDB
             {
                 mongoUrlBuilder = new MongoUrlBuilder(this.ConnectionString);
 
-                if (!string.IsNullOrEmpty(this.Database))
+				if (string.IsNullOrEmpty(mongoUrlBuilder.DatabaseName))
                 {
-                    mongoUrlBuilder.DatabaseName = this.Database;
-                }
-                else if (!String.IsNullOrEmpty(mongoUrlBuilder.DatabaseName))
-                {
-                    this.Database = mongoUrlBuilder.DatabaseName;
+                    mongoUrlBuilder.DatabaseName = Database;
                 }
             }
             // No connection strings at all, use the old method using the properties                    
             else
             {
-                mongoUrlBuilder = new MongoUrlBuilder();
-                mongoUrlBuilder.DatabaseName = this.Database;
-                mongoUrlBuilder.Server = new MongoServerAddress(this.Host, this.Port);
+                mongoUrlBuilder = new MongoUrlBuilder
+	            {
+		            DatabaseName = Database,
+					Server = new MongoServerAddress(Host, Port)
+	            };
 
-                if (HasCredentials) mongoUrlBuilder.DefaultCredentials = new MongoCredentials(this.Username, this.Password);
+	            if (HasCredentials)
+					mongoUrlBuilder.DefaultCredentials = new MongoCredentials(Username, Password);
             }
 
             return GetProvider().GetRepository(mongoUrlBuilder.ToServerSettings(), mongoUrlBuilder.DatabaseName);

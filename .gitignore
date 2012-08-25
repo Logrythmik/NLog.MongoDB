@@ -4,7 +4,8 @@
 [Bb]in/
 [Oo]bj/
 _[Rr]esharper.*/
-TestResult.xml
+TestResult*
 /lib/
 build
 rakefile.config.rb
+*crunch*
