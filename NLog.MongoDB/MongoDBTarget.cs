@@ -121,17 +121,12 @@ namespace NLog.MongoDB
 
         internal BsonDocument BuildBsonDocument(LogEventInfo logEvent)
         {
-            BsonDocument doc;
+            var doc = Fields.Count == 0 || AppendFields
+				? logEvent.ToBsonDocument()
+				: new BsonDocument();
 
-			if (Fields.Count == 0 || this.AppendFields)
-			{
-			    doc = BuildFullBsonDocument(logEvent);
-			}
-			else
-			{
-			    doc = new BsonDocument();
-                if (this.CreateIdField) doc["_id"] = ObjectId.GenerateNewId();
-			}
+			if (CreateIdField)
+				doc.AddField("_id", ObjectId.GenerateNewId());
 
 			foreach (var field in Fields)
 			{
@@ -147,30 +142,6 @@ namespace NLog.MongoDB
 
 				doc.AddField(field.Name, searchResult.Value);
 			}
-
-			return doc;
-		}
-
-        internal BsonDocument BuildFullBsonDocument(LogEventInfo logEvent)
-		{
-			var doc = new BsonDocument();
-            
-			if (CreateIdField)
-				doc.AddField("_id", ObjectId.GenerateNewId());
-
-			doc.AddField("sequenceID", logEvent.SequenceID);
-			doc.AddField("timeStamp", logEvent.TimeStamp);
-			doc.AddField("machineName", Environment.MachineName);
-			doc.AddField("loggerName", logEvent.LoggerName);
-			doc.AddField("message", logEvent.Message);
-			doc.AddField("formattedMessage", logEvent.FormattedMessage);
-			doc.AddField("level", logEvent.Level);
-			doc.AddField("stackTrace", logEvent.StackTrace);
-			doc.AddField("userStackFrame", logEvent.UserStackFrame);
-			doc.AddField("UserStackFrameNumber", logEvent.UserStackFrameNumber);
-			doc.AddField("exception", logEvent.Exception);
-			doc.AddField("properties", logEvent.Properties);
-			doc.AddField("parameters", logEvent.Parameters);
 
 			return doc;
 		}

@@ -55,8 +55,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BsonDocumentExtensions.cs" />
+    <Compile Include="FieldSearchResult.cs" />
     <Compile Include="IRepository.cs" />
     <Compile Include="IRepositoryProvider.cs" />
+    <Compile Include="LogEventInfoExtensions.cs" />
     <Compile Include="MongoDBTarget.cs" />
     <Compile Include="MongoDBTargetField.cs" />
     <Compile Include="MongoRepository.cs" />

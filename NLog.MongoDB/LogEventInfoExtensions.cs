@@ -1,4 +1,6 @@
-﻿using System.Reflection;
+﻿using System;
+using System.Reflection;
+using MongoDB.Bson;
 
 namespace NLog.MongoDB
 {
@@ -22,6 +24,27 @@ namespace NLog.MongoDB
 				Succeded = isInProperties,
 				Value = isInProperties ? logEvent.Properties[propertyName] : null
 			};
+		}
+
+		public static BsonDocument ToBsonDocument(this LogEventInfo logEvent)
+		{
+			var doc = new BsonDocument();
+
+			doc.AddField("sequenceID", logEvent.SequenceID);
+			doc.AddField("timeStamp", logEvent.TimeStamp);
+			doc.AddField("machineName", Environment.MachineName);
+			doc.AddField("loggerName", logEvent.LoggerName);
+			doc.AddField("message", logEvent.Message);
+			doc.AddField("formattedMessage", logEvent.FormattedMessage);
+			doc.AddField("level", logEvent.Level);
+			doc.AddField("stackTrace", logEvent.StackTrace);
+			doc.AddField("userStackFrame", logEvent.UserStackFrame);
+			doc.AddField("UserStackFrameNumber", logEvent.UserStackFrameNumber);
+			doc.AddField("exception", logEvent.Exception);
+			doc.AddField("properties", logEvent.Properties);
+			doc.AddField("parameters", logEvent.Parameters);
+
+			return doc;
 		}
 	}
 }
