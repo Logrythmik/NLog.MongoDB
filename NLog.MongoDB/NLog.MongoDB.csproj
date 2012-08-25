@@ -62,7 +62,6 @@
     <Compile Include="MongoRepository.cs" />
     <Compile Include="MongoServerProvider.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Extensions.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

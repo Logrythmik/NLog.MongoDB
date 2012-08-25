@@ -31,6 +31,18 @@ namespace NLog.MongoDB
 
         public string Password { get; set; }
 
+	    public string CollectionName { get; set; }
+
+	    public bool UseCappedCollection { get; set; }
+
+	    public bool CreateIdField { get; set; }
+
+        public bool AppendFields { get; set; }
+
+        public long? CappedCollectionSize { get; set; }
+
+        public long? CappedCollectionMaxItems { get; set; }
+
         #region Defaulted Properties
 
         public string Host
@@ -62,45 +74,70 @@ namespace NLog.MongoDB
 
         internal IRepository GetRepository()
         {
-            // We have a connection string name, grab this from the config and pass it too the parser.
+            // We have a connection string name, grab this from the config.
             if (!string.IsNullOrWhiteSpace(this.ConnectionName))
             {
                 if (ConfigurationManager.ConnectionStrings[this.ConnectionName] == null ||
                     string.IsNullOrWhiteSpace(ConfigurationManager.ConnectionStrings[this.ConnectionName].ConnectionString))
                     throw new MongoConnectionException("The connection string name specified was not found.");
 
-                return GetProvider().GetRepository(
-                        ConfigurationManager.ConnectionStrings[this.ConnectionName].ConnectionString,
-                        this.Database);
+                this.ConnectionString = ConfigurationManager.ConnectionStrings[this.ConnectionName].ConnectionString;
             }
-            
+
+            MongoUrlBuilder mongoUrlBuilder;
             // We have a connection string
             if (!string.IsNullOrWhiteSpace(this.ConnectionString))
-                return GetProvider().GetRepository(this.ConnectionString, this.Database);
+            {
+                mongoUrlBuilder = new MongoUrlBuilder(this.ConnectionString);
 
-            // No connection strings at all, use the old method using the properties
-            var database = this.Database;
-            var settings = new MongoServerSettings {Server = new MongoServerAddress(this.Host, this.Port)};
-            
-            if (HasCredentials)
-                settings.DefaultCredentials = new MongoCredentials(this.Username, this.Password);
+                if (!string.IsNullOrEmpty(this.Database))
+                {
+                    mongoUrlBuilder.DatabaseName = this.Database;
+                }
+                else if (!String.IsNullOrEmpty(mongoUrlBuilder.DatabaseName))
+                {
+                    this.Database = mongoUrlBuilder.DatabaseName;
+                }
+            }
+            // No connection strings at all, use the old method using the properties                    
+            else
+            {
+                mongoUrlBuilder = new MongoUrlBuilder();
+                mongoUrlBuilder.DatabaseName = this.Database;
+                mongoUrlBuilder.Server = new MongoServerAddress(this.Host, this.Port);
 
-            return GetProvider().GetRepository(settings, database);
+                if (HasCredentials) mongoUrlBuilder.DefaultCredentials = new MongoCredentials(this.Username, this.Password);
+            }
+
+            return GetProvider().GetRepository(mongoUrlBuilder.ToServerSettings(), mongoUrlBuilder.DatabaseName);
         }
 
-        private bool HasCredentials { get { return !string.IsNullOrWhiteSpace(this.Username) && !string.IsNullOrWhiteSpace(this.Password); }}
+	    private bool HasCredentials
+	    {
+	        get
+	        {
+	            return !string.IsNullOrWhiteSpace(this.Username) && !string.IsNullOrWhiteSpace(this.Password);
+	        }
+	    }
 
         internal BsonDocument BuildBsonDocument(LogEventInfo logEvent)
-		{
-			if (Fields.Count == 0)
-				return BuildFullBsonDocument(logEvent);
+        {
+            BsonDocument doc;
 
-			var doc = new BsonDocument();
+			if (Fields.Count == 0 || this.AppendFields)
+			{
+			    doc = BuildFullBsonDocument(logEvent);
+			}
+			else
+			{
+			    doc = new BsonDocument();
+                if (this.CreateIdField) doc["_id"] = ObjectId.GenerateNewId();
+			}
+
 			foreach (var field in Fields)
 			{
 				var value = field.Layout.Render(logEvent);
-
-				doc.Add(field.Name, BsonValue.Create(value));
+				doc[field.Name] = BsonValue.Create(value);
 			}
 
 			return doc;
@@ -109,6 +146,8 @@ namespace NLog.MongoDB
         internal BsonDocument BuildFullBsonDocument(LogEventInfo logEvent)
 		{
 			var doc = new BsonDocument();
+            if (this.CreateIdField) doc["_id"] = ObjectId.GenerateNewId();
+
 			doc["sequenceID"] = logEvent.SequenceID;
 			doc["timeStamp"] = logEvent.TimeStamp;
 			doc["machineName"] = Environment.MachineName;
@@ -127,7 +166,7 @@ namespace NLog.MongoDB
 			if (logEvent.UserStackFrame != null)
 			{
 				doc["userStackFrame"] = logEvent.UserStackFrame.ToString();
-				doc["UserStackFrameNumber"] = logEvent.UserStackFrameNumber;
+				doc["userStackFrameNumber"] = logEvent.UserStackFrameNumber;
 			}
 
 			if (logEvent.Exception != null)
@@ -142,7 +181,7 @@ namespace NLog.MongoDB
 
 			if (logEvent.Parameters != null && logEvent.Parameters.Length > 0)
 			{
-				doc["Parameters"] = logEvent.Parameters.ToBson(); ;
+				doc["parameters"] = logEvent.Parameters.ToJson();
 			}
 
 			return doc;
@@ -188,9 +227,11 @@ namespace NLog.MongoDB
 		{
 			using (var repository = GetRepository())
 			{
-				repository.Insert(
-					logEvent.LoggerName,
-					BuildBsonDocument(logEvent));
+			    string collectionName = logEvent.LoggerName;
+                if (!string.IsNullOrEmpty(this.CollectionName)) collectionName = this.CollectionName;
+
+			    repository.CheckCollection(collectionName, this.UseCappedCollection, this.CappedCollectionSize, this.CappedCollectionMaxItems, this.CreateIdField);
+                repository.Insert(collectionName, BuildBsonDocument(logEvent));
 			}
         }
 
