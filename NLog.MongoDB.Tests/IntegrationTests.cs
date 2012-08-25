@@ -16,7 +16,7 @@ namespace NLog.MongoDB.Tests
 		{
 			var connectionString = ConfigurationManager.ConnectionStrings["MongoDB"].ConnectionString;
 			var server = MongoServer.Create(connectionString);
-		    var connectionStringBuilder = new MongoConnectionStringBuilder(connectionString);
+		    var connectionStringBuilder = new MongoUrlBuilder(connectionString);
 		    var dbName = connectionStringBuilder.DatabaseName;
 			var loggerName = "testDynamicFields";
 
@@ -53,7 +53,7 @@ namespace NLog.MongoDB.Tests
         {
             var connectionString = ConfigurationManager.ConnectionStrings["MongoDB"].ConnectionString;
             var server = MongoServer.Create(connectionString);
-            var connectionStringBuilder = new MongoConnectionStringBuilder(connectionString);
+            var connectionStringBuilder = new MongoUrlBuilder(connectionString);
 
             TestMongoConnection(
                 server,
@@ -66,7 +66,7 @@ namespace NLog.MongoDB.Tests
         {
             var connectionString = ConfigurationManager.ConnectionStrings["MongoDB"].ConnectionString;
             var server = MongoServer.Create(connectionString);
-            var connectionStringBuilder = new MongoConnectionStringBuilder(connectionString);
+            var connectionStringBuilder = new MongoUrlBuilder(connectionString);
 
 			TestMongoConnection(
 				server,
