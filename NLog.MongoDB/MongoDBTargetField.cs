@@ -17,7 +17,6 @@ namespace NLog.MongoDB
 		[RequiredParameter]
 		public string Name { get; set; }
 
-		[RequiredParameter]
 		public Layout Layout { get; set; }
 	}
 }

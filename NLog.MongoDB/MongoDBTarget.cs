@@ -135,8 +135,17 @@ namespace NLog.MongoDB
 
 			foreach (var field in Fields)
 			{
-				var value = field.Layout.Render(logEvent);
-				doc[field.Name] = BsonValue.Create(value);
+				if (field.Layout != null)
+				{
+					doc[field.Name] = field.Layout.Render(logEvent);
+					continue;
+				}
+
+				var searchResult = logEvent.GetValue(field.Name);
+				if (!searchResult.Succeded)
+					throw new InvalidOperationException(string.Format("Invalid field name '{0}'.", field.Name));
+
+				doc.AddField(field.Name, searchResult.Value);
 			}
 
 			return doc;
@@ -145,68 +154,23 @@ namespace NLog.MongoDB
         internal BsonDocument BuildFullBsonDocument(LogEventInfo logEvent)
 		{
 			var doc = new BsonDocument();
-            if (this.CreateIdField) doc["_id"] = ObjectId.GenerateNewId();
+            
+			if (CreateIdField)
+				doc.AddField("_id", ObjectId.GenerateNewId());
 
-			doc["sequenceID"] = logEvent.SequenceID;
-			doc["timeStamp"] = logEvent.TimeStamp;
-			doc["machineName"] = Environment.MachineName;
-
-			if (logEvent.LoggerName != null)
-				doc["loggerName"] = logEvent.LoggerName;
-			if (logEvent.Message != null)
-				doc["message"] = logEvent.Message;
-			if (logEvent.FormattedMessage != null)
-				doc["formattedMessage"] = logEvent.FormattedMessage;
-			if (logEvent.Level != null)
-				doc["level"] = logEvent.Level.ToString();
-			if (logEvent.StackTrace != null)
-				doc["stackTrace"] = logEvent.StackTrace.ToString();
-
-			if (logEvent.UserStackFrame != null)
-			{
-				doc["userStackFrame"] = logEvent.UserStackFrame.ToString();
-				doc["userStackFrameNumber"] = logEvent.UserStackFrameNumber;
-			}
-
-			if (logEvent.Exception != null)
-			{
-				doc["exception"] = BuildExceptionBsonDocument(logEvent.Exception);
-			}
-
-			if (logEvent.Properties != null && logEvent.Properties.Count > 0)
-			{
-				doc["properties"] = BuildPropertiesBsonDocument(logEvent.Properties);
-			}
-
-			if (logEvent.Parameters != null && logEvent.Parameters.Length > 0)
-			{
-				doc["parameters"] = logEvent.Parameters.ToJson();
-			}
-
-			return doc;
-		}
-
-        internal BsonDocument BuildPropertiesBsonDocument(IDictionary<object, object> properties)
-		{
-			var doc = new BsonDocument();
-			foreach (var entry in properties)
-			{
-				doc[entry.Key.ToString()] = entry.Value.ToString();
-			}
-			return doc;
-		}
-
-        internal BsonDocument BuildExceptionBsonDocument(Exception ex)
-		{
-			var doc = new BsonDocument();
-			doc["message"] = ex.Message;
-			doc["source"] = ex.Source ?? string.Empty;
-			doc["stackTrace"] = ex.StackTrace ?? string.Empty;
-
-			if (ex.InnerException != null)
-			{
-				doc["innerException"] = BuildExceptionBsonDocument(ex.InnerException);
-			}
+			doc.AddField("sequenceID", logEvent.SequenceID);
+			doc.AddField("timeStamp", logEvent.TimeStamp);
+			doc.AddField("machineName", Environment.MachineName);
+			doc.AddField("loggerName", logEvent.LoggerName);
+			doc.AddField("message", logEvent.Message);
+			doc.AddField("formattedMessage", logEvent.FormattedMessage);
+			doc.AddField("level", logEvent.Level);
+			doc.AddField("stackTrace", logEvent.StackTrace);
+			doc.AddField("userStackFrame", logEvent.UserStackFrame);
+			doc.AddField("UserStackFrameNumber", logEvent.UserStackFrameNumber);
+			doc.AddField("exception", logEvent.Exception);
+			doc.AddField("properties", logEvent.Properties);
+			doc.AddField("parameters", logEvent.Parameters);
 
 			return doc;
 		}
