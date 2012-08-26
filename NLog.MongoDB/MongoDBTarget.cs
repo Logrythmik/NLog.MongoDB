@@ -72,7 +72,7 @@ namespace NLog.MongoDB
 
         #region Private Helpers
 
-        internal IRepository GetRepository()
+        private IRepository GetRepository()
         {
             // We have a connection string name, grab this from the config.
             if (!string.IsNullOrWhiteSpace(this.ConnectionName))
@@ -119,13 +119,13 @@ namespace NLog.MongoDB
 	        }
 	    }
 
-        internal BsonDocument BuildBsonDocument(LogEventInfo logEvent)
+        private BsonDocument BuildBsonDocument(LogEventInfo logEvent)
         {
             var doc = Fields.Count == 0 || AppendFields
 				? logEvent.ToBsonDocument()
 				: new BsonDocument();
 
-			if (CreateIdField)
+			if (UseCappedCollection && CreateIdField)
 				doc.AddField("_id", ObjectId.GenerateNewId());
 
 			foreach (var field in Fields)
@@ -146,7 +146,16 @@ namespace NLog.MongoDB
 			return doc;
 		}
 
-        #endregion
+		private void VerifyTargetConsistency()
+		{
+			if (UseCappedCollection)
+			{
+				if (!CappedCollectionSize.HasValue)
+					throw new InvalidOperationException("CappedCollectionSize required to use capped collection.");
+			}
+		}
+
+		#endregion
 
 #if DEBUG
 
@@ -159,15 +168,19 @@ namespace NLog.MongoDB
 
 		protected override void Write(LogEventInfo logEvent)
 		{
+			VerifyTargetConsistency();
+
 			using (var repository = GetRepository())
 			{
-			    string collectionName = logEvent.LoggerName;
-                if (!string.IsNullOrEmpty(this.CollectionName)) collectionName = this.CollectionName;
+			    var collectionName = !string.IsNullOrWhiteSpace(CollectionName)
+					? CollectionName
+					: logEvent.LoggerName;
 
-			    repository.CheckCollection(collectionName, this.UseCappedCollection, this.CappedCollectionSize, this.CappedCollectionMaxItems, this.CreateIdField);
-                repository.Insert(collectionName, BuildBsonDocument(logEvent));
+				if (UseCappedCollection)
+					repository.CheckCollection(collectionName, CappedCollectionSize.Value, CappedCollectionMaxItems, CreateIdField);
+                
+				repository.Insert(collectionName, BuildBsonDocument(logEvent));
 			}
         }
-
     }
 }

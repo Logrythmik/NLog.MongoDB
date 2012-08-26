@@ -8,44 +8,46 @@ using NUnit.Framework;
 
 namespace NLog.MongoDB.Tests
 {
-    [TestFixture]
-    public class IntegrationTests
-    {
+	[TestFixture]
+	public class IntegrationTests
+	{
 		[Test]
 		public void Test_DynamicFields()
 		{
 			var connectionString = ConfigurationManager.ConnectionStrings["MongoDB"].ConnectionString;
 			var server = MongoServer.Create(connectionString);
-		    var connectionStringBuilder = new MongoUrlBuilder(connectionString);
-		    var dbName = connectionStringBuilder.DatabaseName;
+			var connectionStringBuilder = new MongoUrlBuilder(connectionString);
+			var dbName = connectionStringBuilder.DatabaseName;
 			var loggerName = "testDynamicFields";
 
 			var db = server.GetDatabase(dbName);
-            var collection = db.GetCollection(loggerName);
+			var collection = db.GetCollection(loggerName);
 
-            // Clear out test collection
-            collection.RemoveAll();
+			// Clear out test collection
+			collection.RemoveAll();
 
-            var logger = LogManager.GetLogger(loggerName);
+			var logger = LogManager.GetLogger(loggerName);
 
-            logger.LogException(
-                LogLevel.Error,
-                "Test Log Message",
-                new Exception("Test Exception", new Exception("Inner Exception")));
+			logger.LogException(
+				LogLevel.Error,
+				"Test Log Message",
+				new Exception("Test Exception", new Exception("Inner Exception")));
 
-            Thread.Sleep(2000);
+			Thread.Sleep(2000);
 
-            collection.FindAll().Count().Should().Be(1);
+			collection.FindAll().Count().Should().Be(1);
 
-            var logEntry = collection.FindAll().First();
-            
+			var logEntry = collection.FindAll().First();
+
+			Assert.IsTrue(logEntry.Contains("_id"));
+
 			logEntry["level"].Should().Be(LogLevel.Error.ToString());
-            logEntry["message"].Should().Be("Test Log Message");
-            logEntry["exception"].Should().Be("Test Exception");
-            
-            // Clean-up
-            db.DropCollection(loggerName);
-            server.Disconnect();
+			logEntry["message"].Should().Be("Test Log Message");
+			logEntry["exception"].Should().Be("Test Exception");
+
+			// Clean-up
+			db.DropCollection(loggerName);
+			server.Disconnect();
 		}
 
 		[Test]
@@ -81,6 +83,8 @@ namespace NLog.MongoDB.Tests
 
 			var logEntry = collection.FindAll().First();
 
+			Assert.IsTrue(logEntry.Contains("_id"));
+
 			Assert.AreEqual(logEventTime.Date, logEntry["timestamp"].AsDateTime.Date);
 
 			logEntry["level"].Should().Be(LogLevel.Error.ToString());
@@ -98,97 +102,159 @@ namespace NLog.MongoDB.Tests
 			server.Disconnect();
 		}
 
-        [Test]
-        public void Test_ConnectionName()
-        {
-            var connectionString = ConfigurationManager.ConnectionStrings["MongoDB"].ConnectionString;
-            var server = MongoServer.Create(connectionString);
-            var connectionStringBuilder = new MongoUrlBuilder(connectionString);
+		[Test]
+		public void Test_Capped_Collection_With_Id()
+		{
+			var connectionString = ConfigurationManager.ConnectionStrings["MongoDB"].ConnectionString;
+			var server = MongoServer.Create(connectionString);
+			var connectionStringBuilder = new MongoUrlBuilder(connectionString);
+			var dbName = connectionStringBuilder.DatabaseName;
+			var loggerName = "cappedWithId";
 
-            TestMongoConnection(
-                server,
-                connectionStringBuilder.DatabaseName,
-                "testMongoConnectionName");
-        }
+			var db = server.GetDatabase(dbName);
+			db.DropCollection(loggerName);
+			var collection = db.GetCollection(loggerName);
 
-        [Test]
-        public void Test_ConnectionString()
-        {
-            var connectionString = ConfigurationManager.ConnectionStrings["MongoDB"].ConnectionString;
-            var server = MongoServer.Create(connectionString);
-            var connectionStringBuilder = new MongoUrlBuilder(connectionString);
+			var logger = LogManager.GetLogger(loggerName);
+			var logEventTime = DateTime.UtcNow;
+
+			var logEvent = new LogEventInfo
+			{
+				Level = LogLevel.Info,
+				TimeStamp = logEventTime,
+				LoggerName = loggerName
+			};
+
+			logger.Log(logEvent);
+			Thread.Sleep(2000);
+
+			collection.FindAll().Count().Should().Be(1);
+
+			var logEntry = collection.FindAll().First();
+
+			Assert.IsTrue(logEntry.Contains("_id"));
+
+			db.DropCollection(loggerName);
+			server.Disconnect();
+		}
+
+		[Test]
+		public void Test_Capped_Collection_Without_Id()
+		{
+			var connectionString = ConfigurationManager.ConnectionStrings["MongoDB"].ConnectionString;
+			var server = MongoServer.Create(connectionString);
+			var connectionStringBuilder = new MongoUrlBuilder(connectionString);
+			var dbName = connectionStringBuilder.DatabaseName;
+			var loggerName = "cappedWithoutId";
+
+			var db = server.GetDatabase(dbName);
+			db.DropCollection(loggerName);
+			var collection = db.GetCollection(loggerName);
+
+			var logger = LogManager.GetLogger(loggerName);
+			var logEventTime = DateTime.UtcNow;
+
+			var logEvent = new LogEventInfo
+			{
+				Level = LogLevel.Info,
+				TimeStamp = logEventTime,
+				LoggerName = loggerName
+			};
+
+			logger.Log(logEvent);
+			Thread.Sleep(2000);
+
+			collection.FindAll().Count().Should().Be(1);
+
+			var logEntry = collection.FindAll().First();
+
+			Assert.IsTrue(collection.IsCapped());
+			Assert.IsFalse(logEntry.Contains("_id"));
+			Assert.IsFalse(collection.Settings.AssignIdOnInsert);
+
+			db.DropCollection(loggerName);
+			server.Disconnect();
+		}
+		
+		[Test]
+		public void Test_ConnectionName()
+		{
+			var connectionString = ConfigurationManager.ConnectionStrings["MongoDB"].ConnectionString;
+			var server = MongoServer.Create(connectionString);
+			var connectionStringBuilder = new MongoUrlBuilder(connectionString);
 
 			TestMongoConnection(
 				server,
-                connectionStringBuilder.DatabaseName,
+				connectionStringBuilder.DatabaseName,
+				"testMongoConnectionName");
+		}
+
+		[Test]
+		public void Test_ConnectionString()
+		{
+			var connectionString = ConfigurationManager.ConnectionStrings["MongoDB"].ConnectionString;
+			var server = MongoServer.Create(connectionString);
+			var connectionStringBuilder = new MongoUrlBuilder(connectionString);
+
+			TestMongoConnection(
+				server,
+				connectionStringBuilder.DatabaseName,
 				"testMongoConnectionString");
-        }
+		}
 
-        [Test]
-        public void Test_OldWay()
-        {
-            var server = new MongoServer(
-                new MongoServerSettings
-                    {
-                        Server = new MongoServerAddress("ds035607.mongolab.com", 35607),
-                        DefaultCredentials = new MongoCredentials("mongo", "db")
-                    });
+		[Test]
+		public void Test_OldWay()
+		{
+			var settings = new MongoServerSettings
+			{
+				Server = new MongoServerAddress("ds035607.mongolab.com", 35607),
+				DefaultCredentials = new MongoCredentials("mongo", "db")
+			};
 
-            TestMongoConnection(
-                server,
-                "nlog",
-                "testMongo"
-                );
-        }
+			TestMongoConnection(new MongoServer(settings), "nlog", "testMongo");
+		}
 
-        #region Helpers
+		#region Helpers
 
-        private void TestMongoConnection(
-            MongoServer server, 
-            string database,
-            string loggerName)
-        {
-            var db = server.GetDatabase(database);
-            var collection = db.GetCollection(loggerName);
+		private void TestMongoConnection(MongoServer server, string database, string loggerName)
+		{
+			var db = server.GetDatabase(database);
+			var collection = db.GetCollection(loggerName);
 
-            // Clear out test collection
-            collection.RemoveAll();
+			// Clear out test collection
+			collection.RemoveAll();
 
-            var logger = LogManager.GetLogger(loggerName);
+			var logger = LogManager.GetLogger(loggerName);
 
-            logger.LogException(
-                LogLevel.Error,
-                "Test Log Message",
-                new Exception("Test Exception", new Exception("Inner Exception")));
+			logger.LogException(
+				LogLevel.Error,
+				"Test Log Message",
+				new Exception("Test Exception", new Exception("Inner Exception")));
 
-            Thread.Sleep(2000);
+			Thread.Sleep(2000);
 
-            collection.FindAll().Count()
-                .Should().Be(1);
+			collection.FindAll().Count().Should().Be(1);
 
-            var logEntry = collection.FindAll().First();
+			var logEntry = collection.FindAll().First();
 
-            logEntry["level"]
-                .Should().Be(LogLevel.Error.ToString());
-            logEntry["message"]
-                .Should().Be("Test Log Message");
-            
+			Assert.IsTrue(logEntry.Contains("_id"));
+
+			logEntry["level"].Should().Be(LogLevel.Error.ToString());
+			logEntry["message"].Should().Be("Test Log Message");
+
 			var exception = logEntry["exception"].AsBsonDocument;
-			
-			exception["message"]
-                .Should().Be("Test Exception");
-            
+
+			exception["message"].Should().Be("Test Exception");
+
 			var innerException = exception["innerException"].AsBsonDocument;
-			
-			innerException["message"]
-                .Should().Be("Inner Exception");
 
-            // Clean-up
-            db.DropCollection(loggerName);
-            server.Disconnect();
-        }
+			innerException["message"].Should().Be("Inner Exception");
 
-        #endregion
+			// Clean-up
+			db.DropCollection(loggerName);
+			server.Disconnect();
+		}
 
-    }
+		#endregion
+	}
 }

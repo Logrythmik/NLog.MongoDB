@@ -6,40 +6,40 @@ namespace NLog.MongoDB
     using System.Collections.Generic;
     using global::MongoDB.Driver.Builders;
 
-    public class MongoRepository : IRepository
+	internal sealed class MongoRepository : IRepository
 	{
-		private MongoServer _Server;
-		private readonly string _Database;
-        private static readonly List<string> CollectionCache = new List<string>();
+		private MongoServer _server;
+		private readonly string _database;
+
+		private static readonly List<string> CollectionCache = new List<string>();
 
         public MongoRepository(MongoServerSettings settings, string databaseName)
 	    {
-            _Server = new MongoServer(settings);
-            _Database = databaseName;
-	        _Server.Connect();
+            _server = new MongoServer(settings);
+            _database = databaseName;
+	        _server.Connect();
         }
 
-        public void CheckCollection(string collectionName, bool useCappedCollection, long? cappedCollectionSize, long? cappedCollectionMaxItems, bool createIdField)
+        public void CheckCollection(string collectionName, long collectionSize, long? collectionMaxItems, bool createIdField)
         {
-            if (useCappedCollection && !cappedCollectionSize.HasValue)
-            {
-                throw new NLogConfigurationException("If UseCappedCollection is set to true, you must set CappedCollectionSize!");
-            }
-
-            var db = _Server.GetDatabase(_Database);
+            var db = _server.GetDatabase(_database);
 
             lock (CollectionCache)
             {
-                if (!useCappedCollection || CollectionCache.Contains(collectionName)) return;
+                if (CollectionCache.Contains(collectionName)) return;
                 
                 if (!db.CollectionExists(collectionName))
                 {
                     var collectionOptionsBuilder = new CollectionOptionsBuilder();
-                    collectionOptionsBuilder.SetCapped(true);
-                        
-                    if (createIdField) collectionOptionsBuilder.SetAutoIndexId(true);
-                    if (cappedCollectionSize.HasValue) collectionOptionsBuilder.SetMaxSize(cappedCollectionSize.Value);
-                    if (cappedCollectionMaxItems.HasValue) collectionOptionsBuilder.SetMaxDocuments(cappedCollectionMaxItems.Value);
+
+					collectionOptionsBuilder.SetCapped(true);
+					collectionOptionsBuilder.SetMaxSize(collectionSize);
+
+                    if (createIdField)
+						collectionOptionsBuilder.SetAutoIndexId(true);
+                    
+					if (collectionMaxItems.HasValue)
+						collectionOptionsBuilder.SetMaxDocuments(collectionMaxItems.Value);
 
                     db.CreateCollection(collectionName, collectionOptionsBuilder);
                 }
@@ -51,15 +51,15 @@ namespace NLog.MongoDB
 
 	    public void Insert(string collectionName, BsonDocument item)
 		{
-			var db = _Server.GetDatabase(_Database);
+			var db = _server.GetDatabase(_database);
 	        var collection = db.GetCollection(collectionName);
 			collection.Insert(item);
 		}
 
 		public void Dispose()
 		{
-			_Server.Disconnect();
-			_Server = null;
+			_server.Disconnect();
+			_server = null;
 		}
 	}
 }
