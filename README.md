@@ -105,3 +105,6 @@ OR
 
 OR
 * ConnectionName (the name configured in the configuration/connectionString node)
+
+*Also (optional)*
+* collectionName - the name of the Mongo collection. If you don't specify this, it uses the logger name.
