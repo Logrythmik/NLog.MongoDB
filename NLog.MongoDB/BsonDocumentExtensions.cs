@@ -52,7 +52,7 @@ namespace NLog.MongoDB
                     string keyStr = key.ToString();
                     //used to make sure that the data does not conflict with properties of the exception
                     if (keyStr == "message" || keyStr == "source" || keyStr == "stackTrace" || keyStr == "innerException")
-                        keyStr += "_2";
+                        keyStr += "_data";
 
                     doc[keyStr] = ex.Data[key] != null ? ex.Data[key].ToString() : "null";
                 }
