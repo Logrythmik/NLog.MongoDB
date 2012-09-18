@@ -45,6 +45,19 @@ namespace NLog.MongoDB
 			doc["source"] = ex.Source ?? string.Empty;
 			doc["stackTrace"] = ex.StackTrace ?? string.Empty;
 
+            if (ex.Data != null)
+            {
+                foreach (var key in ex.Data.Keys)
+                {
+                    string keyStr = key.ToString();
+                    //used to make sure that the data does not conflict with properties of the exception
+                    if (keyStr == "message" || keyStr == "source" || keyStr == "stackTrace" || keyStr == "innerException")
+                        keyStr += "_2";
+
+                    doc[keyStr] = ex.Data[key] != null ? ex.Data[key].ToString() : "null";
+                }
+            }
+
 			if (ex.InnerException != null)
 			{
 				doc["innerException"] = BuildExceptionBsonDocument(ex.InnerException);
