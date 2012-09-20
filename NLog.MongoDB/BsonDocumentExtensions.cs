@@ -54,7 +54,7 @@ namespace NLog.MongoDB
                     if (keyStr == "message" || keyStr == "source" || keyStr == "stackTrace" || keyStr == "innerException")
                         keyStr += "_data";
 
-                    doc[keyStr] = ex.Data[key] != null ? ex.Data[key].ToString() : "null";
+                    doc[keyStr] = BsonValue.Create(ex.Data[key]);
                 }
             }
 
