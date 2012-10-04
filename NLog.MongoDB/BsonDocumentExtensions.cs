@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using MongoDB.Bson;
+using System.Linq;
 
 namespace NLog.MongoDB
 {
@@ -24,8 +25,12 @@ namespace NLog.MongoDB
 
 				case "parameters":
 					var parameters = (object[])value;
-					if (parameters.Length > 0)
-						doc[name] = parameters.ToBson();
+                    BsonArray array = new BsonArray();
+                    foreach (var param in parameters)
+                    {
+                        array.Add(BsonValue.Create(param));
+                    }
+                    doc[name] = array;
 					break;
 
 				default:
