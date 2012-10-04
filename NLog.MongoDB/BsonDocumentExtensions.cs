@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using MongoDB.Bson;
+using System.Linq;
 
 namespace NLog.MongoDB
 {
@@ -24,8 +25,12 @@ namespace NLog.MongoDB
 
 				case "parameters":
 					var parameters = (object[])value;
-					if (parameters.Length > 0)
-						doc[name] = parameters.ToBson();
+                    BsonArray array = new BsonArray();
+                    foreach (var param in parameters)
+                    {
+                        array.Add(BsonValue.Create(param));
+                    }
+                    doc[name] = array;
 					break;
 
 				default:
@@ -44,6 +49,19 @@ namespace NLog.MongoDB
 			doc["message"] = ex.Message;
 			doc["source"] = ex.Source ?? string.Empty;
 			doc["stackTrace"] = ex.StackTrace ?? string.Empty;
+
+            if (ex.Data != null)
+            {
+                foreach (var key in ex.Data.Keys)
+                {
+                    string keyStr = key.ToString();
+                    //used to make sure that the data does not conflict with properties of the exception
+                    if (keyStr == "message" || keyStr == "source" || keyStr == "stackTrace" || keyStr == "innerException")
+                        keyStr += "_data";
+
+                    doc[keyStr] = BsonValue.Create(ex.Data[key]);
+                }
+            }
 
 			if (ex.InnerException != null)
 			{
