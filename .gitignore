@@ -9,3 +9,4 @@ TestResult*
 build
 rakefile.config.rb
 *crunch*
+*.key
