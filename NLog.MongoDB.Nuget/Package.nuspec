@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>NLog.MongoDB</id>
-    <version>0.4.0</version>
+    <version>0.5.0</version>
     <authors>Jason Wicker,Tim Kellogg</authors>
     <owners>Jason Wicker</owners>
     <licenseUrl>https://github.com/Logrythmik/NLog.MongoDB/blob/master/License.txt</licenseUrl>

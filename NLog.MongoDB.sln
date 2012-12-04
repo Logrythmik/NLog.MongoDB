@@ -13,6 +13,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{428013
 		.nuget\NuGet.targets = .nuget\NuGet.targets
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NLog.MongoDB.Nuget", "NLog.MongoDB.Nuget\NLog.MongoDB.Nuget.csproj", "{B7B0F947-A740-447C-8757-73086D0362ED}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -26,8 +28,15 @@ Global
 		{D1A284A0-A340-48A7-8821-60787305E9D1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{D1A284A0-A340-48A7-8821-60787305E9D1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D1A284A0-A340-48A7-8821-60787305E9D1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B7B0F947-A740-447C-8757-73086D0362ED}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B7B0F947-A740-447C-8757-73086D0362ED}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B7B0F947-A740-447C-8757-73086D0362ED}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B7B0F947-A740-447C-8757-73086D0362ED}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{B7B0F947-A740-447C-8757-73086D0362ED} = {4280133F-10A6-40AC-AC17-8769A243D07E}
 	EndGlobalSection
 EndGlobal
