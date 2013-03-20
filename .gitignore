@@ -10,3 +10,6 @@ build
 rakefile.config.rb
 *crunch*
 *.key
+*.DotSettings
+Upgrade*
+packages

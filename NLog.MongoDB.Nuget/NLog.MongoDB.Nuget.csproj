@@ -51,13 +51,9 @@
   <ItemGroup>
     <None Include="BuildPublishPackage.cmd" />
     <None Include="Package.nuspec" />
-    <None Include="tools\init.ps1" />
-    <None Include="tools\install.ps1" />
-    <None Include="tools\uninstall.ps1" />
     <None Include="NuGet.exe" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="content\" />
     <Folder Include="lib\" />
   </ItemGroup>
   <ItemGroup>
@@ -81,7 +77,8 @@
     <Exec WorkingDirectory="$(MSBuildProjectDirectory)" Command="BuildPublishPackage.cmd Publish" Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' " />
   </Target>
   <PropertyGroup>
-    <PreBuildEvent>xcopy "$(TargetDir)NLog.MongoDB.dll" "$(ProjectDir)lib\net40\" /i /d /y</PreBuildEvent>
+    <PreBuildEvent>
+    </PreBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
     <PostBuildEvent>

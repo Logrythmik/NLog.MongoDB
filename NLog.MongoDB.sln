@@ -1,6 +1,6 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 11.00
-# Visual Studio 2010
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NLog.MongoDB", "NLog.MongoDB\NLog.MongoDB.csproj", "{FE562E35-7488-4EDC-8334-E0BC611DDDF9}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NLog.MongoDB.Tests", "NLog.MongoDB.Tests\NLog.MongoDB.Tests.csproj", "{D1A284A0-A340-48A7-8821-60787305E9D1}"
@@ -14,6 +14,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{428013
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NLog.MongoDB.Nuget", "NLog.MongoDB.Nuget\NLog.MongoDB.Nuget.csproj", "{B7B0F947-A740-447C-8757-73086D0362ED}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NLog.MongoDB.Console", "NLog.MongoDB.Console\NLog.MongoDB.Console.csproj", "{A6B64753-8551-4601-A800-E68E24F5B526}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -32,6 +34,10 @@ Global
 		{B7B0F947-A740-447C-8757-73086D0362ED}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B7B0F947-A740-447C-8757-73086D0362ED}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B7B0F947-A740-447C-8757-73086D0362ED}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A6B64753-8551-4601-A800-E68E24F5B526}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A6B64753-8551-4601-A800-E68E24F5B526}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A6B64753-8551-4601-A800-E68E24F5B526}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A6B64753-8551-4601-A800-E68E24F5B526}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
