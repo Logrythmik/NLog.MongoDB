@@ -132,7 +132,9 @@ namespace NLog.MongoDB
 			{
 				if (field.Layout != null)
 				{
-					doc[field.Name] = field.Layout.Render(logEvent);
+					var renderedField = field.Layout.Render(logEvent);
+					if (!string.IsNullOrWhiteSpace(renderedField))
+						doc[field.Name] = renderedField;
 					continue;
 				}
 
