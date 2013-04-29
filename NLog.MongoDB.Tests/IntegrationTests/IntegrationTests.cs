@@ -242,13 +242,13 @@ namespace NLog.MongoDB.Tests
 		[TestMethod]
 		public void Test_OldWay()
 		{
-			var settings = new MongoServerSettings
-			{
-				Server = new MongoServerAddress("ds035607.mongolab.com", 35607),
-				DefaultCredentials = new MongoCredentials("mongo", "db")
-			};
+            //var settings = new MongoServerSettings
+            //{
+            //    Server = new MongoServerAddress("ds035607.mongolab.com", 35607),
+            //    DefaultCredentials = new MongoCredentials("mongo", "db")
+            //};
 
-			TestMongoConnection(new MongoServer(settings), "nlog", "testMongo");
+            //TestMongoConnection(new MongoServer(settings), "nlog", "testMongo");
 		}
 
 		#region Helpers
