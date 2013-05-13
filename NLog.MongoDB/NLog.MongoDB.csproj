@@ -61,6 +61,7 @@
     <Compile Include="IRepositoryProvider.cs" />
     <Compile Include="LogEventInfoExtensions.cs" />
     <Compile Include="MongoDBTarget.cs" />
+    <Compile Include="MongoDBTargetDocument.cs" />
     <Compile Include="MongoDBTargetField.cs" />
     <Compile Include="MongoRepository.cs" />
     <Compile Include="MongoServerProvider.cs" />

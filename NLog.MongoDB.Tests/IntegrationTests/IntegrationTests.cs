@@ -212,6 +212,45 @@ namespace NLog.MongoDB.Tests
 			db.DropCollection(loggerName);
 			server.Disconnect();
 		}
+
+        [TestMethod]
+        public void Test_NestedDocuments()
+        {
+            var connectionString = ConfigurationManager.ConnectionStrings["MongoDB"].ConnectionString;
+            var server = MongoServer.Create(connectionString);
+            var connectionStringBuilder = new MongoUrlBuilder(connectionString);
+            var dbName = connectionStringBuilder.DatabaseName;
+            var loggerName = "nestedDocuments";
+
+            var db = server.GetDatabase(dbName);
+            var collection = db.GetCollection(loggerName);
+
+            // Clear out test collection
+            collection.RemoveAll();
+
+            var logger = LogManager.GetLogger(loggerName);
+
+            logger.LogException(
+                LogLevel.Error,
+                "Test Log Message",
+                new Exception("Test Exception", new Exception("Inner Exception")));
+
+            Thread.Sleep(2000);
+
+            collection.FindAll().Count().Should().Be(1);
+
+            var logEntry = collection.FindAll().First();
+
+            Assert.IsTrue(logEntry.Contains("_id"));
+
+            logEntry["level"].Should().Be(LogLevel.Error.ToString());
+            logEntry["nestedDocument"].AsBsonDocument["message"].Should().Be("Test Log Message");
+            logEntry["nestedDocument"].AsBsonDocument["nestedException"].AsBsonDocument["exception"].AsBsonDocument["message"].Should().Be("Test Exception");
+
+            // Clean-up
+            db.DropCollection(loggerName);
+            server.Disconnect();
+        }
 		
 		[TestMethod]
 		public void Test_ConnectionName()

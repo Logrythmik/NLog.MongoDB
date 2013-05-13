@@ -16,12 +16,16 @@ namespace NLog.MongoDB
 		public MongoDBTarget()
 		{
 			Fields = new List<MongoDBTargetField>();
+            Documents = new List<MongoDBTargetDocument>();
 		}
 
         #region Exposed Properties
 
 		[ArrayParameter(typeof(MongoDBTargetField), "field")]
 		public IList<MongoDBTargetField> Fields { get; private set; }
+
+        [ArrayParameter(typeof(MongoDBTargetDocument), "document")]
+        public IList<MongoDBTargetDocument> Documents { get; private set; }
 
         public string ConnectionString { get; set; }
 
@@ -121,32 +125,50 @@ namespace NLog.MongoDB
 
         private BsonDocument BuildBsonDocument(LogEventInfo logEvent)
         {
-            var doc = Fields.Count == 0 || AppendFields
+            var doc = (Fields.Count == 0 && Documents.Count == 0) || AppendFields
 				? logEvent.ToBsonDocument()
 				: new BsonDocument();
 
 			if (UseCappedCollection && CreateIdField)
 				doc.AddField("_id", ObjectId.GenerateNewId());
 
-			foreach (var field in Fields)
-			{
-				if (field.Layout != null)
-				{
-					var renderedField = field.Layout.Render(logEvent);
-					if (!string.IsNullOrWhiteSpace(renderedField))
-						doc[field.Name] = renderedField;
-					continue;
-				}
-
-				var searchResult = logEvent.GetValue(field.Name);
-				if (!searchResult.Succeded)
-					throw new InvalidOperationException(string.Format("Invalid field name '{0}'.", field.Name));
-
-				doc.AddField(field.Name, searchResult.Value);
-			}
+            BuildBsonDocumentFields(logEvent, doc, Fields);
+            BuildBsonDocumentDocument(logEvent, doc, Documents);            
 
 			return doc;
 		}
+
+        private void BuildBsonDocumentDocument(LogEventInfo logEvent, BsonDocument doc, IList<MongoDBTargetDocument> Documents)
+        {
+            foreach (var d in Documents)
+            {
+                var newDoc = new BsonDocument();
+                BuildBsonDocumentFields(logEvent, newDoc, d.Fields);
+                BuildBsonDocumentDocument(logEvent, newDoc, d.Documents);
+                if (newDoc.ElementCount > 0)
+                    doc[d.Name] = newDoc;
+            }
+        }
+
+        private void BuildBsonDocumentFields(LogEventInfo logEvent, BsonDocument doc, IList<MongoDBTargetField> Fields)
+        {
+            foreach (var field in Fields)
+            {
+                if (field.Layout != null)
+                {
+                    var renderedField = field.Layout.Render(logEvent);
+                    if (!string.IsNullOrWhiteSpace(renderedField))
+                        doc[field.Name] = renderedField;
+                    continue;
+                }
+
+                var searchResult = logEvent.GetValue(field.Name);
+                if (!searchResult.Succeded)
+                    throw new InvalidOperationException(string.Format("Invalid field name '{0}'.", field.Name));
+
+                doc.AddField(field.Name, searchResult.Value);
+            }
+        }
 
 		private void VerifyTargetConsistency()
 		{
