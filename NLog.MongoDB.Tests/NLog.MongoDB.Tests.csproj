@@ -70,6 +70,7 @@
     <Compile Include="IntegrationTests\IntegrationTests.cs" />
     <Compile Include="UnitTests\TestMongoTarget.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="UnitTests\TestMongoTargetDocument.cs" />
     <Compile Include="UnitTests\TestMongoTargetField.cs" />
   </ItemGroup>
   <ItemGroup>
