@@ -105,10 +105,14 @@ namespace NLog.MongoDB
 	            };
 
 	            if (HasCredentials)
-					mongoUrlBuilder.DefaultCredentials = new MongoCredentials(Username, Password);
+	            {
+	                mongoUrlBuilder.Username = Username;
+	                mongoUrlBuilder.Password = Password;
+	            }
             }
 
-            return GetProvider().GetRepository(mongoUrlBuilder.ToServerSettings(), mongoUrlBuilder.DatabaseName);
+            MongoServerSettings mongoServerSettings = MongoServerSettings.FromUrl(mongoUrlBuilder.ToMongoUrl());
+            return GetProvider().GetRepository(mongoServerSettings, mongoUrlBuilder.DatabaseName);
         }
 
 	    private bool HasCredentials
