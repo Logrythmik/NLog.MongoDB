@@ -28,17 +28,13 @@ namespace NLog.MongoDB
                     BsonArray array = new BsonArray();
                     foreach (var param in parameters)
                     {
-                        array.Add(BsonValue.Create(param));
+                        array.Add(SafeCreateBsonValue(param));
                     }
                     doc[name] = array;
 					break;
 
 				default:
-					BsonValue bsonValue;
-					if (BsonTypeMapper.TryMapToBsonValue(value, out bsonValue))
-						doc[name] = bsonValue;
-					else
-						doc[name] = BsonValue.Create(value.ToString());
+                    doc[name] = SafeCreateBsonValue(value);
 					break;
 			}
 		}
@@ -59,7 +55,7 @@ namespace NLog.MongoDB
                     if (keyStr == "message" || keyStr == "source" || keyStr == "stackTrace" || keyStr == "innerException")
                         keyStr += "_data";
 
-                    doc[keyStr] = BsonValue.Create(ex.Data[key]);
+                    doc[keyStr] = SafeCreateBsonValue(ex.Data[key]);
                 }
             }
 
@@ -80,5 +76,15 @@ namespace NLog.MongoDB
 			}
 			return doc;
 		}
+
+	    private static BsonValue SafeCreateBsonValue(object value)
+	    {
+	        BsonValue bsonValue;
+	        if (BsonTypeMapper.TryMapToBsonValue(value, out bsonValue))
+	        {
+	            return bsonValue;
+	        }
+	        return BsonValue.Create(value.ToString());
+	    }
 	}
 }
