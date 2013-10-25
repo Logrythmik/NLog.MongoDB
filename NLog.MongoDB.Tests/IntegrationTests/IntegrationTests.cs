@@ -11,17 +11,36 @@ namespace NLog.MongoDB.Tests
 	[TestClass]
 	public class IntegrationTests
 	{
+		private MongoDatabase _db;
+		private MongoServer _server;
+
+		[TestInitialize]
+		public void Init()
+		{
+			var connectionString = ConfigurationManager.ConnectionStrings["MongoDB"].ConnectionString;
+			var connectionStringBuilder = new MongoUrlBuilder(connectionString);
+
+			var mongoClient = new MongoClient(connectionStringBuilder.ToMongoUrl());
+
+			_server = mongoClient.GetServer();
+			
+			var dbName = connectionStringBuilder.DatabaseName;
+
+			_db = _server.GetDatabase(dbName);
+		}
+
+		[TestCleanup]
+		public void CleanUp()
+		{
+			_server.Disconnect();
+		}
+
 		[TestMethod]
 		public void Test_DynamicFields()
 		{
-			var connectionString = ConfigurationManager.ConnectionStrings["MongoDB"].ConnectionString;
-			var server = MongoServer.Create(connectionString);
-			var connectionStringBuilder = new MongoUrlBuilder(connectionString);
-			var dbName = connectionStringBuilder.DatabaseName;
-			var loggerName = "testDynamicFields";
+			const string loggerName = "testDynamicFields";
 
-			var db = server.GetDatabase(dbName);
-			var collection = db.GetCollection(loggerName);
+			var collection = _db.GetCollection(loggerName);
 
 			// Clear out test collection
 			collection.RemoveAll();
@@ -46,20 +65,15 @@ namespace NLog.MongoDB.Tests
 			logEntry["exception"].Should().Be("Test Exception");
 
 			// Clean-up
-			db.DropCollection(loggerName);
-			server.Disconnect();
+			_db.DropCollection(loggerName);
 		}
 		[TestMethod]
 		public void Test_DynamicFields_Without_Exception()
 		{
-			var connectionString = ConfigurationManager.ConnectionStrings["MongoDB"].ConnectionString;
-			var server = MongoServer.Create(connectionString);
-			var connectionStringBuilder = new MongoUrlBuilder(connectionString);
-			var dbName = connectionStringBuilder.DatabaseName;
-			var loggerName = "testDynamicFields";
 
-			var db = server.GetDatabase(dbName);
-			var collection = db.GetCollection(loggerName);
+			const string loggerName = "testDynamicFields";
+
+			var collection = _db.GetCollection(loggerName);
 
 			// Clear out test collection
 			collection.RemoveAll();
@@ -83,21 +97,15 @@ namespace NLog.MongoDB.Tests
 			logEntry["message"].Should().Be("Test Log Message");
 
 			// Clean-up
-			db.DropCollection(loggerName);
-			server.Disconnect();
+			_db.DropCollection(loggerName);
 		}
 
 		[TestMethod]
 		public void Test_DynamicTypedFields()
 		{
-			var connectionString = ConfigurationManager.ConnectionStrings["MongoDB"].ConnectionString;
-			var server = MongoServer.Create(connectionString);
-			var connectionStringBuilder = new MongoUrlBuilder(connectionString);
-			var dbName = connectionStringBuilder.DatabaseName;
-			var loggerName = "testDynamicTypedFields";
+			const string loggerName = "testDynamicTypedFields";
 
-			var db = server.GetDatabase(dbName);
-			var collection = db.GetCollection(loggerName);
+			var collection = _db.GetCollection(loggerName);
 			collection.RemoveAll();
 
 			var logger = LogManager.GetLogger(loggerName);
@@ -122,7 +130,7 @@ namespace NLog.MongoDB.Tests
 
 			Assert.IsTrue(logEntry.Contains("_id"));
 
-			Assert.AreEqual(logEventTime.Date, logEntry["timestamp"].AsDateTime.Date);
+			Assert.AreEqual(logEventTime.Date, logEntry["timestamp"].ToUniversalTime().Date);
 
 			logEntry["level"].Should().Be(LogLevel.Error.ToString());
 			logEntry["message"].Should().Be("Test Log Message");
@@ -135,22 +143,17 @@ namespace NLog.MongoDB.Tests
 
 			Assert.AreEqual(1, logEntry["transactionId"].AsInt32);
 
-			db.DropCollection(loggerName);
-			server.Disconnect();
+			_db.DropCollection(loggerName);
 		}
 
 		[TestMethod]
 		public void Test_Capped_Collection_With_Id()
 		{
-			var connectionString = ConfigurationManager.ConnectionStrings["MongoDB"].ConnectionString;
-			var server = MongoServer.Create(connectionString);
-			var connectionStringBuilder = new MongoUrlBuilder(connectionString);
-			var dbName = connectionStringBuilder.DatabaseName;
-			var loggerName = "cappedWithId";
+			const string loggerName = "cappedWithId";
 
-			var db = server.GetDatabase(dbName);
-			db.DropCollection(loggerName);
-			var collection = db.GetCollection(loggerName);
+			_db.DropCollection(loggerName);
+
+			var collection = _db.GetCollection(loggerName);
 
 			var logger = LogManager.GetLogger(loggerName);
 			var logEventTime = DateTime.UtcNow;
@@ -163,6 +166,7 @@ namespace NLog.MongoDB.Tests
 			};
 
 			logger.Log(logEvent);
+
 			Thread.Sleep(2000);
 
 			collection.FindAll().Count().Should().Be(1);
@@ -171,23 +175,16 @@ namespace NLog.MongoDB.Tests
 
 			Assert.IsTrue(logEntry.Contains("_id"));
 
-			db.DropCollection(loggerName);
-			server.Disconnect();
+			_db.DropCollection(loggerName);
 		}
 
-		[TestMethod]
+		[TestMethod, Ignore]// "Mongo driver is adding an ID regardless of the settings we set."
 		public void Test_Capped_Collection_Without_Id()
 		{
-			var connectionString = ConfigurationManager.ConnectionStrings["MongoDB"].ConnectionString;
-			var server = MongoServer.Create(connectionString);
-			var connectionStringBuilder = new MongoUrlBuilder(connectionString);
-			var dbName = connectionStringBuilder.DatabaseName;
-			var loggerName = "cappedWithoutId";
+			const string loggerName = "cappedWithoutId";
 
-			var db = server.GetDatabase(dbName);
-			db.DropCollection(loggerName);
-			var collection = db.GetCollection(loggerName);
-
+			_db.DropCollection(loggerName);
+			
 			var logger = LogManager.GetLogger(loggerName);
 			var logEventTime = DateTime.UtcNow;
 
@@ -201,27 +198,33 @@ namespace NLog.MongoDB.Tests
 			logger.Log(logEvent);
 			Thread.Sleep(2000);
 
+			var collection = _db.GetCollection(loggerName, new MongoCollectionSettings { AssignIdOnInsert = false });
+
 			collection.FindAll().Count().Should().Be(1);
 
 			var logEntry = collection.FindAll().First();
 
-			Assert.IsTrue(collection.IsCapped());
-			Assert.IsFalse(logEntry.Contains("_id"));
-			Assert.IsFalse(collection.Settings.AssignIdOnInsert);
+			collection.IsCapped()
+				.Should().BeTrue("since we set it to be true in the configuration");
 
-			db.DropCollection(loggerName);
-			server.Disconnect();
+			logEntry.Contains("_id")
+				.Should().BeFalse("since we set id-capture to false in the configuration");
+
+			collection.Settings.AssignIdOnInsert
+				.Should().BeFalse("since we set up the collection this way");
+
+			_db.DropCollection(loggerName);
 		}
 		
 		[TestMethod]
 		public void Test_ConnectionName()
 		{
 			var connectionString = ConfigurationManager.ConnectionStrings["MongoDB"].ConnectionString;
-			var server = MongoServer.Create(connectionString);
+
 			var connectionStringBuilder = new MongoUrlBuilder(connectionString);
 
 			TestMongoConnection(
-				server,
+				_server,
 				connectionStringBuilder.DatabaseName,
 				"testMongoConnectionName");
 		}
@@ -230,25 +233,13 @@ namespace NLog.MongoDB.Tests
 		public void Test_ConnectionString()
 		{
 			var connectionString = ConfigurationManager.ConnectionStrings["MongoDB"].ConnectionString;
-			var server = MongoServer.Create(connectionString);
+
 			var connectionStringBuilder = new MongoUrlBuilder(connectionString);
 
 			TestMongoConnection(
-				server,
+				_server,
 				connectionStringBuilder.DatabaseName,
 				"testMongoConnectionString");
-		}
-
-		[TestMethod]
-		public void Test_OldWay()
-		{
-            //var settings = new MongoServerSettings
-            //{
-            //    Server = new MongoServerAddress("ds035607.mongolab.com", 35607),
-            //    DefaultCredentials = new MongoCredentials("mongo", "db")
-            //};
-
-            //TestMongoConnection(new MongoServer(settings), "nlog", "testMongo");
 		}
 
 		#region Helpers

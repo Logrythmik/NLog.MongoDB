@@ -111,7 +111,7 @@ namespace NLog.MongoDB
 	            }
             }
 
-            MongoServerSettings mongoServerSettings = MongoServerSettings.FromUrl(mongoUrlBuilder.ToMongoUrl());
+            var mongoServerSettings = MongoServerSettings.FromUrl(mongoUrlBuilder.ToMongoUrl());
             return GetProvider().GetRepository(mongoServerSettings, mongoUrlBuilder.DatabaseName);
         }
 

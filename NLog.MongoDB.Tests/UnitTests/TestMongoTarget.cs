@@ -163,7 +163,7 @@ namespace NLog.MongoDB.Tests
 				GetProvider = () => _mockProvider.Object
 			};
 
-			var eventLogInfo = new LogEventInfo() { LoggerName = "loggerName" };
+			var eventLogInfo = new LogEventInfo { LoggerName = "loggerName" };
 
 			_mockRepository.Setup(r => r.Insert("loggerName", It.IsAny<BsonDocument>()));
 
@@ -187,7 +187,7 @@ namespace NLog.MongoDB.Tests
 				GetProvider = () => _mockProvider.Object
 			};
 
-			var eventLogInfo = new LogEventInfo() { LoggerName = "loggerName" };
+			var eventLogInfo = new LogEventInfo { LoggerName = "loggerName" };
 
 			_mockRepository.Setup(r => r.Insert(collectionName, It.IsAny<BsonDocument>()));
 
@@ -210,7 +210,7 @@ namespace NLog.MongoDB.Tests
 				GetProvider = () => _mockProvider.Object
 			};
 
-			var eventLogInfo = new LogEventInfo() { LoggerName = "loggerName" };
+			var eventLogInfo = new LogEventInfo { LoggerName = "loggerName" };
 
 			_mockRepository
 				.Setup(r => r.Insert(It.IsAny<string>(), It.IsAny<BsonDocument>()));

@@ -11,7 +11,7 @@ namespace NLog.MongoDB
 		private MongoServer _server;
 		private readonly string _database;
 
-		private static readonly List<string> CollectionCache = new List<string>();
+		private static readonly Dictionary<string, bool> _collectionCache = new Dictionary<string, bool>();
 
         public MongoRepository(MongoServerSettings settings, string databaseName)
 	    {
@@ -24,9 +24,9 @@ namespace NLog.MongoDB
         {
             var db = _server.GetDatabase(_database);
 
-            lock (CollectionCache)
+            lock (_collectionCache)
             {
-                if (CollectionCache.Contains(collectionName)) return;
+                if (_collectionCache.ContainsKey(collectionName)) return;
                 
                 if (!db.CollectionExists(collectionName))
                 {
@@ -34,17 +34,16 @@ namespace NLog.MongoDB
 
 					collectionOptionsBuilder.SetCapped(true);
 					collectionOptionsBuilder.SetMaxSize(collectionSize);
+					collectionOptionsBuilder.SetAutoIndexId(createIdField);
 
-                    if (createIdField)
-						collectionOptionsBuilder.SetAutoIndexId(true);
-                    
-					if (collectionMaxItems.HasValue)
+                    if (collectionMaxItems.HasValue)
 						collectionOptionsBuilder.SetMaxDocuments(collectionMaxItems.Value);
 
-                    db.CreateCollection(collectionName, collectionOptionsBuilder);
+	                db.CreateCollection(collectionName, collectionOptionsBuilder);
+
                 }
 
-                CollectionCache.Add(collectionName);
+                _collectionCache.Add(collectionName, createIdField);
             }
 
         }
@@ -52,7 +51,15 @@ namespace NLog.MongoDB
 	    public void Insert(string collectionName, BsonDocument item)
 		{
 			var db = _server.GetDatabase(_database);
-	        var collection = db.GetCollection(collectionName);
+
+		    MongoCollection collection;
+
+			// if we shouldn't save ids
+		    if (_collectionCache.ContainsKey(collectionName) && !_collectionCache[collectionName])
+			    collection = db.GetCollection(collectionName, new MongoCollectionSettings {AssignIdOnInsert = false});
+			else
+				collection = db.GetCollection(collectionName);
+			
 			collection.Insert(item);
 		}
 
