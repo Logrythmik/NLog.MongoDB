@@ -58,6 +58,8 @@ namespace NLog.MongoDB
                     //used to make sure that the data does not conflict with properties of the exception
                     if (keyStr == "message" || keyStr == "source" || keyStr == "stackTrace" || keyStr == "innerException")
                         keyStr += "_data";
+                    keyStr = keyStr.Replace('$', '_');
+                    keyStr = keyStr.Replace('.', '_');
 
                     doc[keyStr] = BsonValue.Create(ex.Data[key]);
                 }
