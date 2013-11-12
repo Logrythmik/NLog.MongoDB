@@ -42,6 +42,7 @@ namespace NLog.MongoDB
 			doc.AddField("UserStackFrameNumber", logEvent.UserStackFrameNumber);
 			doc.AddField("exception", logEvent.Exception);
 			doc.AddField("properties", logEvent.Properties);
+			doc.AddField("context", logEvent.Properties);
 			doc.AddField("parameters", logEvent.Parameters);
 
 			return doc;
