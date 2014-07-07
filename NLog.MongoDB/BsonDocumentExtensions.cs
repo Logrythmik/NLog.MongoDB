@@ -42,7 +42,7 @@ namespace NLog.MongoDB
 		private static BsonDocument BuildExceptionBsonDocument(Exception ex)
 		{
 			var doc = new BsonDocument();
-            doc["type"] = ex.GetType().FullName;
+			doc["type"] = ex.GetType().FullName;
 			doc["message"] = ex.Message;
 			doc["source"] = ex.Source ?? string.Empty;
 			doc["stackTrace"] = ex.StackTrace ?? string.Empty;
