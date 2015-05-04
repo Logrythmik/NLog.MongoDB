@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>NLog.MongoDB20</id>
+    <version>1.0.1</version>
+    <authors>Jason Wicker,Tim Kellogg,S. Doug Hunt</authors>
+    <owners>S. Doug Hunt</owners>
+    <licenseUrl>https://github.com/cccsdh/NLog.MongoDB20/blob/master/License.txt</licenseUrl>
+    <projectUrl>https://github.com/cccsdh/NLog.MongoDB20</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>An NLog Target for MongoDB 2.0 Driver persistence. This package targets Mongo C# Driver 2.0</description>
+    <copyright>Copyright 2015</copyright>
+    <tags>logging nlog mongodb driver2.0 mongo log</tags>
+    <dependencies>
+      <dependency id="MongoDB.Driver" version="2.0.0" />
+      <dependency id="nlog" version="3.2.1" />
+    </dependencies>
+  </metadata>
+</package>
