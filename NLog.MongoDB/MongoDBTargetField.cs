@@ -18,5 +18,7 @@ namespace NLog.MongoDB
 		public string Name { get; set; }
 
 		public Layout Layout { get; set; }
+		
+		public string BsonType { get; set; }
 	}
 }
