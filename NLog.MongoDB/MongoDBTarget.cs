@@ -138,7 +138,29 @@ namespace NLog.MongoDB
 				{
 					var renderedField = field.Layout.Render(logEvent);
 					if (!string.IsNullOrWhiteSpace(renderedField))
+                    {
+                        var bsonTypeValue = field.BsonType;
+                        if (!string.IsNullOrWhiteSpace(bsonTypeValue))
+                        {
+                            const bool IgnoreCase = true;
+                            BsonType bsonType;
+                            if (Enum.TryParse(bsonTypeValue, IgnoreCase, out bsonType))
+                            {
+                                var bsonValue = BsonTypeMapper.MapToBsonValue(renderedField, bsonType);
+                                doc[field.Name] = bsonValue;
+                            }
+                            else
+                            {
+                                var msg = "Unknown BsonType specified: " + bsonTypeValue;
+                                msg += ". Note that the type name must match enum names from the MongoDB.Bson.BsonType in the C# driver and do not necessarily match the MongoDB internal type names.";
+                                throw new InvalidOperationException(msg);
+                            }
+                        }
+                        else
+                        {
 						doc[field.Name] = renderedField;
+                        }
+                    }
 					continue;
 				}
 
